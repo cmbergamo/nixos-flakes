@@ -7,6 +7,10 @@
     # Toolchains Rust versionáveis por flake (para devShells e templates).
     rust-overlay.url = "github:oxalica/rust-overlay";
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Oh-My-Pi (omp): coding agent
+    oh-my-pi.url = "github:can1357/oh-my-pi";
+    oh-my-pi.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, ... }:
@@ -22,7 +26,10 @@
     # --- Sistema desta máquina (para outra, adicione um novo bloco aqui) ---
     nixosConfigurations.cmb-nix = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
-      modules = [ ./configuration.nix ];
+      modules = [
+        inputs.oh-my-pi.nixosModules.default
+        ./configuration.nix
+      ];
     };
 
     # --- Shell de desenvolvimento Rust ---

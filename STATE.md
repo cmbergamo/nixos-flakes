@@ -10,9 +10,10 @@
 - Impressora Epson L4260 Wi-Fi: 192.168.1.24 (DHCP — reservar p/ MAC e0:bb:9e:12:cf:e2), portas 9100+515+631 abertas; IPP puro exige TLS (HTTP 426)
 
 ## Flake
-- inputs: nixos-unstable pin `c043004d` (26.11.20260905) + rust-overlay (follows)
+- inputs: nixos-unstable pin `c043004d` (26.11.20260905) + rust-overlay (follows) + oh-my-pi (follows nixpkgs)
 - host único: `nixosConfigurations.cmb-nix` → `./configuration.nix`
 - `allowUnfree=true`; `nix-ld` ON (rustup/FHS bins); stateVersion "26.05"
+- `programs.omp.enable=true`: Oh-My-Pi instalado automaticamente no sistema (/run/current-system/sw/bin/omp) via release oficial v18.1.15 + nix-ld; PATH inclui ~/.local/bin
 - devShell `nix develop` (rust-bin stable + r-a/clippy/rustfmt + mold); template `nix flake init -t .#rust`
 - `/etc/nixos` é CÓPIA VELHA separada (sem ./modules) — fonte da verdade é ESTE repo; rebuild sempre `--flake .#cmb-nix`
 

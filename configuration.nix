@@ -121,6 +121,25 @@ environment.systemPackages = with pkgs; [
 
 programs.nix-ld.enable = true;
 
+  # Oh-My-Pi (omp): coding agent instalado automaticamente
+  programs.omp = {
+    enable = true;
+    package = pkgs.runCommand "omp-18.1.15" {
+      meta = {
+        description = "Oh-My-Pi (omp) coding agent";
+        homepage = "https://github.com/can1357/oh-my-pi";
+        mainProgram = "omp";
+      };
+    } ''
+      mkdir -p $out/bin
+      cp ${pkgs.fetchurl {
+        url = "https://github.com/can1357/oh-my-pi/releases/download/v18.1.15/omp-linux-x64";
+        sha256 = "1p4s2h9ni0ynb31hdq3sjzjxkl11m6kpfihv953sqcmv3yj1hxbl";
+      }} $out/bin/omp
+      chmod +x $out/bin/omp
+    '';
+  };
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

@@ -22,9 +22,9 @@
     valgrind
   ];
 
-  # ~/.cargo/bin com prioridade no PATH (shells de login/interativos).
+  # ~/.cargo/bin e ~/.local/bin com prioridade no PATH (shells de login/interativos).
   environment.shellInit = ''
-    export PATH="$HOME/.cargo/bin:''${PATH}"
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:''${PATH}"
   '';
   environment.extraInit = config.environment.shellInit;
 }
