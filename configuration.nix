@@ -8,10 +8,15 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./modules/hosts/cmb-nix.nix
       ./modules/rust.nix
       ./modules/gaming.nix
       ./modules/lxqt.nix
+      ./modules/terminal.nix
+      ./modules/wayland.nix
       ./modules/memory.nix
+      ./modules/printing.nix
+      ./modules/wireguard.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -111,7 +116,6 @@ environment.systemPackages = with pkgs; [
   fd
   kdePackages.discover
   ntfs3g
-  epson-escpr
   epsonscan2
 ];
 
