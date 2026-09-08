@@ -7,7 +7,10 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      /etc/nixos/hardware-configuration.nix
+      ./hardware-configuration.nix
+      ./modules/rust.nix
+      ./modules/gaming.nix
+      ./modules/memory.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -92,7 +95,7 @@
   users.users."cmbergamo" = {
     isNormalUser = true;
     description = "cmbergamo";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "gamemode" ];
     packages = with pkgs; [
     #  thunderbird
     ];
@@ -118,7 +121,13 @@ environment.systemPackages = with pkgs; [
   bat
   ripgrep
   fd
+  kdePackages.discover
+  ntfs3g
+  epson-escpr
+  epsonscan2
 ];
+
+programs.nix-ld.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
