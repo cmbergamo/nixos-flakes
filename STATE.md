@@ -4,7 +4,7 @@
 
 ## Máquina (verificado ao vivo)
 - CPU Ryzen 7 5700X · RAM 32G · GPU AMD RX 6800/6900 XT (1002:73ff, amdgpu, sem NVIDIA)
-- GRUB BIOS em /dev/sdb (MBR, dual-boot Windows os-prober) · kernel linuxPackages_latest
+- GRUB BIOS em /dev/sda e /dev/sdb (MBR, dual-boot Windows os-prober) · kernel linuxPackages_latest
 - Hostname `cmb-nix` · user `cmbergamo` (wheel, networkmanager, gamemode) · shell padrão bash; nushell via wezterm
 - IP LAN 192.168.1.18/24 (DHCP) · locale pt_BR.UTF-8 · tz America/Sao_Paulo · teclado br/ABNT2 (X+console+labwc)
 - Impressora Epson L4260 Wi-Fi: 192.168.1.24 (DHCP — reservar p/ MAC e0:bb:9e:12:cf:e2), portas 9100+515+631 abertas; IPP puro exige TLS (HTTP 426)
@@ -19,7 +19,7 @@
 ## Módulos (todos importados em configuration.nix)
 | arquivo | faz | pegadinhas/decisões |
 |---|---|---|
-| hosts/cmb-nix.nix | monta /mnt/windows + /mnt/dados (ntfs3, UUID, uid=1000) | UUIDs verificados em /dev/disk/by-uuid |
+| hosts/cmb-nix.nix | monta /mnt/windows + /mnt/dados (ntfs3, UUID, uid=1000, nofail, automount) | UUIDs reais /dev/disk/by-uuid; removido bigtime (inválido p/ ntfs3) |
 | rust.nix | rustup + pkg-config/openssl/gdb/valgrind; PATH ~/.cargo/bin via shellInit+extraInit | pós-instalação manual: `rustup default stable && rustup component add rust-analyzer clippy rustfmt`; nushell precisa `path add ~/.cargo/bin` |
 | gaming.nix | hardware.graphics + vulkan-tools; programs.steam (32bit ok); heroic (Epic), lutris, protonup-qt, gamescope, mangohud, prismlauncher; gamemode | GPU AMD: amdgpu nativo, nada extra |
 | lxqt.nix | X11+LightDM+LXQt; xscreensaver (PAM+setuid — corrige desbloqueio); xkb br; portal; qt6ct+kvantum; atalhos globais via files/globalkeyshortcuts.conf + serviço symlink ~/.config/lxqt/ | serviço `lxqt-shortcuts-link`; GUI sobrescreve no próximo login |

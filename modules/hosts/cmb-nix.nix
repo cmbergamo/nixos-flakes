@@ -14,22 +14,30 @@
 # ===========================================================================
 {
   fileSystems."/mnt/windows" = {
-    device = "UUID=B8567E5F567E1DF6";
+    device = "/dev/disk/by-uuid/B8567E5F567E1DF6";
     fsType = "ntfs3";
     options = [
       "uid=1000" "gid=100"        # você (cmbergamo) é o dono dos arquivos
-      "noatime" "bigtime"         # um pouco mais de performance
+      "noatime"
       "iocharset=utf8"
+      "windows_names"
+      "nofail"                    # não trava o boot se o Windows deixar a partição suja/bloqueada
+      "x-systemd.automount"       # monta sob demanda ao acessar a pasta
+      "x-systemd.idle-timeout=1min"
     ];
   };
 
   fileSystems."/mnt/dados" = {
-    device = "UUID=34C813AFC8136E7C";
+    device = "/dev/disk/by-uuid/34C813AFC8136E7C";
     fsType = "ntfs3";
     options = [
       "uid=1000" "gid=100"
-      "noatime" "bigtime"
+      "noatime"
       "iocharset=utf8"
+      "windows_names"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=1min"
     ];
   };
 
