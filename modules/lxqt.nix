@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   # Ambiente gráfico LXQt (leve, baseado em Qt).
@@ -10,6 +10,21 @@
     displayManager.lightdm.enable = true;
     desktopManager.lxqt.enable = true;
   };
+
+  # Bloqueio de tela (xscreensaver, usado pelo "Lock screen"/Win+Esc do LXQt).
+  # Este módulo é OBRIGATÓRIO para o desbloqueio funcionar: ele cria o
+  # wrapper setuid /run/wrappers/bin/xscreensaver-auth e o serviço PAM
+  # /etc/pam.d/xscreensaver. Sem eles, a senha digitada na tela de bloqueio
+  # nunca autentica (era o seu bug: xscreensaver-auth não era setuid root
+  # e o fallback PAM (/etc/pam.d/other) é deny-all).
+  services.xscreensaver.enable = true;
+
+  # O daemon continua sendo iniciado pelo autostart do próprio LXQt
+  # (lxqt-xscreensaver-autostart); desligo o serviço systemd do módulo para
+  # não haver dois daemons. O binário busca o wrapper em /run/wrappers/bin
+  # a cada autenticação, então basta o rebuild — sem precisar reiniciar a
+  # sessão para o desbloqueio voltar a funcionar.
+  systemd.user.services.xscreensaver.wantedBy = lib.mkForce [ ];
 
   # Teclado brasileiro (ABNT2) no X e no console (TTY).
   services.xserver.xkb = {
