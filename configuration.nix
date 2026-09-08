@@ -11,6 +11,7 @@
       ./modules/rust.nix
       ./modules/gaming.nix
       ./modules/memory.nix
+      ./modules/hosts/cmb-nix.nix
     ];
 
   # Use the GRUB 2 boot loader.
