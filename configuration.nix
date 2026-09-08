@@ -10,8 +10,8 @@
       ./hardware-configuration.nix
       ./modules/rust.nix
       ./modules/gaming.nix
+      ./modules/lxqt.nix
       ./modules/memory.nix
-      ./modules/hosts/cmb-nix.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -53,21 +53,8 @@
     LC_TIME = "pt_BR.UTF-8";
   };
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  # X11, LightDM, LXQt e teclado ABNT2: ver ./modules/lxqt.nix
 
-  # Enable the LXQT Desktop Environment.
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.desktopManager.lxqt.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "br";
-    variant = "";
-  };
-
-  # Configure console keymap
-  console.keyMap = "br-abnt2";
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
