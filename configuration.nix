@@ -31,16 +31,46 @@
   # Early KMS para GPU AMD Radeon RX 6600 (amdgpu)
   boot.initrd.kernelModules = [ "amdgpu" ];
 
-  # Força a porta DisplayPort (DP-3) ativa mesmo se o computador for ligado
-  # com o monitor desligado, garantindo sinal de vídeo quando a tela for ligada.
-  boot.kernelParams = [ "video=DP-3:1920x1080@165e" ];
+  # Garante DisplayPort-2 sempre configurado como monitor primário ao iniciar o X11/LightDM
+  services.xserver.displayManager.setupCommands = ''
+    ${pkgs.xrandr}/bin/xrandr --output DisplayPort-2 --primary --auto || true
+  '';
 
   # Hibernação (suspend-to-disk): partição swap para salvar e restaurar a memória
   boot.resumeDevice = "/dev/disk/by-uuid/bcd27a36-1bb4-4844-b1c3-0007ef6a97f6";
 
   # Driver de vídeo AMD nativo no X11 e autoconfiguração de telas ao plugar/ligar
   services.xserver.videoDrivers = [ "amdgpu" ];
-  services.autorandr.enable = true;
+  # Autorandr com perfil padrão para DisplayPort-2 e suporte à tela de login do LightDM (UID 78)
+  services.autorandr = {
+    enable = true;
+    defaultTarget = "default";
+    profiles.default = {
+      fingerprint.DisplayPort-2 = "*";
+      config.DisplayPort-2 = {
+        enable = true;
+        primary = true;
+        mode = "1920x1080";
+      };
+    };
+  };
+  systemd.services.autorandr.environment.AUTORANDR_UID_MIN = "0";
+
+  # Serviço acionado pelo udev ao ligar o monitor (evento DRM) para ativar a saída instantaneamente
+  systemd.services.displayport-hotplug = {
+    description = "Ativa DisplayPort-2 ao ligar o monitor após o boot";
+    wantedBy = [ ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "dp-hotplug" ''
+        for auth in /run/lightdm/root/:0 /home/*/.Xauthority; do
+          if [ -r "$auth" ]; then
+            DISPLAY=:0 XAUTHORITY="$auth" ${pkgs.xrandr}/bin/xrandr --output DisplayPort-2 --auto --primary || true
+          fi
+        done
+      '';
+    };
+  };
 
   networking.hostName = "cmb-nix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
