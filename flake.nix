@@ -11,6 +11,9 @@
     # Oh-My-Pi (omp): coding agent
     oh-my-pi.url = "github:can1357/oh-my-pi";
     oh-my-pi.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Gerenciador declarativo de Flatpaks
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs = inputs@{ self, nixpkgs, ... }:
@@ -28,6 +31,7 @@
       specialArgs = { inherit inputs; };
       modules = [
         inputs.oh-my-pi.nixosModules.default
+        inputs.nix-flatpak.nixosModules.nix-flatpak
         ./configuration.nix
       ];
     };

@@ -139,9 +139,8 @@
     ];
   };
 
-  # Install firefox.
-  programs.firefox.enable = true;
-
+  # Firefox nativo removido em prol do Flatpak (declarado em modules/flatpak.nix)
+  # programs.firefox.enable = false;
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 

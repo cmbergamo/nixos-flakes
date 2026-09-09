@@ -1,31 +1,34 @@
 { config, pkgs, ... }:
 
 {
-  # GPU AMD (Radeon, RDNA): driver amdgpu + OpenGL/Vulkan (radv), incluindo
-  # os componentes de 32 bits que Steam e jogos via Proton exigem.
+  # GPU AMD (Radeon, RDNA): driver amdgpu + OpenGL/Vulkan (radv).
+  # Suporte a 32 bits mantido para jogos Wine/Proton executados via Flatpak.
   hardware.graphics = {
     enable = true;
+    enable32Bit = true;
     extraPackages = with pkgs; [ vulkan-tools ];
   };
 
-  # Steam (habilita também as bibliotecas de 32 bits necessárias).
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true;      # Steam Remote Play
-    dedicatedServer.openFirewall = true; # servidores dedicados
+  # Regras udev para controles e gamepads (Xbox, PlayStation, Switch, Steam Controller)
+  # no Flatpak da Steam e outros jogos.
+  hardware.steam-hardware.enable = true;
+
+  # Regras de firewall para Steam / jogos (Remote Play, LAN transfers e servidores dedicados)
+  networking.firewall = {
+    allowedTCPPorts = [ 27015 27036 27037 27040 ];
+    allowedUDPPorts = [ 27015 27036 10400 10401 ];
+    allowedUDPPortRanges = [
+      { from = 27031; to = 27035; }
+    ];
   };
 
-  # Epic Games Store via Heroic Games Launcher (nativo, open source),
-  # mais Lutris (GOG/Amazon/etc.) e ProtonUp-Qt para instalar Proton-GE.
-  # Obs.: a Epic não tem cliente nativo Linux; instale os jogos pela Heroic.
-  # MangoHud (overlay de FPS) funciona como pacote: ative com MANGOHUD=1.
+  # Ferramentas auxiliares de jogos no sistema:
+  # gamescope (micro-compositor) e mangohud (overlay de FPS/hardware).
+  # As lojas e launchers (Steam, Heroic, Lutris, ProtonUp-Qt, Prism Launcher)
+  # foram migrados para Flatpak declarativo em modules/flatpak.nix.
   environment.systemPackages = with pkgs; [
-    heroic
-    lutris
-    protonup-qt
     gamescope
     mangohud
-    prismlauncher # Minecraft
   ];
 
   # Prioridade de CPU/IO/GPU durante jogos (gamemoderun <jogo>).
