@@ -50,4 +50,30 @@
       }
     ];
   };
+
+  # ===========================================================================
+  # Scanner integrado da Epson L4260 (Wi-Fi):
+  #
+  # A L4260 suporta nativamente o protocolo eSCL (Apple AirScan / Mopria Scan)
+  # sobre HTTPS (porta 443) e o protocolo Epson Net (porta 1865).
+  #
+  # Com o backend sane-airscan, o SANE descobre o scanner automaticamente via
+  # mDNS (Avahi) e pelo IP configurado. Funciona diretamente em aplicativos
+  # como Document Scanner (simple-scan), GIMP e Epson Scan 2 (epsonscan2).
+  # ===========================================================================
+  hardware.sane = {
+    enable = true;
+    openFirewall = true;
+    extraBackends = with pkgs; [
+      sane-airscan
+      epsonscan2
+    ];
+    netConf = "192.168.1.24";
+  };
+
+  # Aplicativos de digitalização:
+  #  - simple-scan: interface gráfica moderna e rápida para escanear em PDF ou imagem
+  environment.systemPackages = with pkgs; [
+    simple-scan
+  ];
 }

@@ -1,0 +1,27 @@
+# XScreenSaver - Configuração elegante com tema dark e Fira Mono
+mode:			blank
+timeout:		0:10:00
+cycle:			0:10:00
+lock:			True
+lockTimeout:		0:00:00
+passwdTimeout:		0:00:30
+fade:			True
+unfade:			True
+fadeSeconds:		0:00:02
+fadeTicks:		20
+splash:			False
+
+# Diálogo de autenticação
+dialogTheme:		darkgray
+dateFormat:		%A, %d de %B  |  %H:%M
+passwd.uname:		True
+passwd.asterisks:	True
+
+# Tipografia Fira Mono
+Dialog.headingFont:	Fira Mono bold 16
+Dialog.bodyFont:	Fira Mono 13
+Dialog.errorFont:	Fira Mono bold 13
+Dialog.labelFont:	Fira Mono bold 13
+Dialog.unameFont:	Fira Mono 12
+Dialog.buttonFont:	Fira Mono bold 13
+Dialog.dateFont:	Fira Mono 11

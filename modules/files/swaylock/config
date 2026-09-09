@@ -1,0 +1,33 @@
+# Swaylock - Configuração de tela de desbloqueio elegante
+image=/run/current-system/sw/share/lxqt/wallpapers/origami-dark-labwc.png
+scaling=fill
+font=Fira Mono
+font-size=15
+indicator-radius=110
+indicator-thickness=10
+
+# Paleta dark nórdica
+inside-color=2e3440cc
+inside-clear-color=88c0d0cc
+inside-caps-lock-color=ebcb8bcc
+inside-ver-color=5e81accc
+inside-wrong-color=bf616acc
+
+ring-color=3b4252
+ring-clear-color=88c0d0
+ring-caps-lock-color=ebcb8b
+ring-ver-color=81a1c1
+ring-wrong-color=bf616a
+
+key-hl-color=88c0d0
+bs-hl-color=bf616a
+line-color=00000000
+separator-color=00000000
+
+text-color=eceff4
+text-clear-color=eceff4
+text-caps-lock-color=eceff4
+text-ver-color=eceff4
+text-wrong-color=eceff4
+
+show-failed-attempts

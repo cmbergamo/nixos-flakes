@@ -10,4 +10,23 @@ local config = wezterm.config_builder()
 -- login.nu (se existir).
 config.default_prog = { "nu", "-l" }
 
+-- Tema escuro moderno de alto contraste e legibilidade
+config.color_scheme = "Catppuccin Mocha"
+
+-- Tipografia Fira Mono
+config.font = wezterm.font("Fira Mono")
+config.font_size = 11.5
+
+-- Visual e acabamento
+config.window_background_opacity = 0.95
+config.window_padding = {
+  left = 12,
+  right = 12,
+  top = 10,
+  bottom = 10,
+}
+config.hide_tab_bar_if_only_one_tab = true
+config.scrollback_lines = 10000
+config.use_fancy_tab_bar = false
+
 return config

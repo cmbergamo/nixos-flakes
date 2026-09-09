@@ -38,45 +38,45 @@
 
   <!-- <font><theme> can be defined without an attribute to set all places -->
   <theme>
-    <name>Vent</name>
-    <icon>breeze</icon>
+    <name>Vent-dark</name>
+    <icon>Papirus-Dark</icon>
     <fallbackAppIcon>labwc</fallbackAppIcon>
     <titlebar>
       <layout>icon:iconify,max,close</layout>
       <showTitle>yes</showTitle>
     </titlebar>
-    <cornerRadius>10</cornerRadius>
+    <cornerRadius>8</cornerRadius>
     <keepBorder>yes</keepBorder>
     <maximizedDecoration>titlebar</maximizedDecoration>
     <dropShadows>yes</dropShadows>
     <dropShadowsOnTiled>no</dropShadowsOnTiled>
     <font place="ActiveWindow">
-      <name>sans</name>
-      <size>13</size>
+      <name>Fira Mono</name>
+      <size>10</size>
       <slant>normal</slant>
       <weight>bold</weight>
     </font>
     <font place="InActiveWindow">
-      <name>sans</name>
-      <size>13</size>
-      <slant>normal</slant>
-      <weight>bold</weight>
-    </font>
-    <font place="MenuHeader">
-      <name>sans</name>
-      <size>12</size>
+      <name>Fira Mono</name>
+      <size>10</size>
       <slant>normal</slant>
       <weight>normal</weight>
     </font>
+    <font place="MenuHeader">
+      <name>Fira Mono</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>bold</weight>
+    </font>
     <font place="MenuItem">
-      <name>sans</name>
-      <size>12</size>
+      <name>Fira Mono</name>
+      <size>10</size>
       <slant>normal</slant>
       <weight>normal</weight>
     </font>
     <font place="OnScreenDisplay">
-      <name>sans</name>
-      <size>13</size>
+      <name>Fira Mono</name>
+      <size>11</size>
       <slant>normal</slant>
       <weight>normal</weight>
     </font>
@@ -288,7 +288,10 @@
       <action name="Execute" command="wezterm"/>
     </keybind>
     <keybind key="W-b">
-      <action name="Execute" command="xdg-open about:blank"/>
+      <action name="Execute" command="firefox"/>
+    </keybind>
+    <keybind key="W-B">
+      <action name="Execute" command="firefox"/>
     </keybind>
     <keybind key="W-e">
       <action name="Execute" command="pcmanfm-qt"/>

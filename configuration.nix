@@ -17,6 +17,7 @@
       ./modules/memory.nix
       ./modules/printing.nix
       ./modules/wireguard.nix
+      ./modules/flatpak.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -79,7 +80,7 @@
     #wireplumber.enable = true;
   };
 
-  services.flatpak.enable = true;
+  # Flatpak & Flathub configurados em ./modules/flatpak.nix
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
@@ -88,7 +89,7 @@
   users.users."cmbergamo" = {
     isNormalUser = true;
     description = "cmbergamo";
-    extraGroups = [ "networkmanager" "wheel" "gamemode" ];
+    extraGroups = [ "networkmanager" "wheel" "gamemode" "scanner" "lp" ];
     packages = with pkgs; [
     #  thunderbird
     ];
@@ -109,12 +110,10 @@ environment.systemPackages = with pkgs; [
   wezterm
   nushell
   wget
-  flatpak
   git
   bat
   ripgrep
   fd
-  kdePackages.discover
   ntfs3g
   epsonscan2
 ];
