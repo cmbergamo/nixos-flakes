@@ -71,6 +71,22 @@
     netConf = "192.168.1.24";
   };
 
+  # Portas do protocolo Epson Net (ESC/I-2 sobre rede):
+  # Necessárias para a comunicação bidirecional com o scanner na porta 1865.
+  networking.firewall.allowedTCPPorts = [ 1865 ];
+  networking.firewall.allowedUDPPorts = [ 1865 ];
+
+  # Habilita os plugins proprietários do Epson Scan 2 (comunicação de rede e OCR).
+  # Sem withNonFreePlugins=true, o epsonscan2 não instala o plugin de rede e
+  # falha ao conectar no scanner via Wi-Fi ao clicar em "Seguinte".
+  nixpkgs.overlays = [
+    (final: prev: {
+      epsonscan2 = prev.epsonscan2.override {
+        withNonFreePlugins = true;
+      };
+    })
+  ];
+
   # Configuração declarativa do sane-airscan: busca instantânea (sem timeout de mDNS)
   # diretamente no endpoint eSCL seguro da impressora na rede local.
   environment.etc."sane.d/airscan.conf".text = ''
