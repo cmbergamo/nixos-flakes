@@ -71,6 +71,43 @@
     netConf = "192.168.1.24";
   };
 
+  # Configuração declarativa do sane-airscan: busca instantânea (sem timeout de mDNS)
+  # diretamente no endpoint eSCL seguro da impressora na rede local.
+  environment.etc."sane.d/airscan.conf".text = ''
+    [devices]
+    "Epson EcoTank L4260" = https://192.168.1.24/eSCL/
+  '';
+
+  # Configuração declarativa do Epson Scan 2 (epsonscan2):
+  # Garante que o aplicativo use o modo Network e aponte para o IP 192.168.1.24,
+  # evitando que tente conectar via USB por padrão.
+  systemd.user.services.epsonscan2-net-config = {
+    description = "Configura o IP da Epson L4260 no Epson Scan 2";
+    wantedBy = [ "default.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "epsonscan2-net-config" ''
+        mkdir -p "$HOME/.epsonscan2/Network" "$HOME/.epsonscan2/Connection"
+        cat > "$HOME/.epsonscan2/Network/epsonscan2.conf" << 'EOF'
+[Network]
+192.168.1.24
+EOF
+        if [ ! -f "$HOME/.epsonscan2/Connection/PreferredInfo.dat" ] || grep -q '"USB"' "$HOME/.epsonscan2/Connection/PreferredInfo.dat"; then
+          cat > "$HOME/.epsonscan2/Connection/PreferredInfo.dat" << 'EOF'
+{
+    "Connection": {
+        "string": "Network"
+    },
+    "ESDisplayName": {
+        "string": "EPSON L4260 Series"
+    }
+}
+EOF
+        fi
+      '';
+    };
+  };
+
   # Aplicativos de digitalização:
   #  - simple-scan: interface gráfica moderna e rápida para escanear em PDF ou imagem
   environment.systemPackages = with pkgs; [

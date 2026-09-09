@@ -28,6 +28,20 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Early KMS para GPU AMD Radeon RX 6600 (amdgpu)
+  boot.initrd.kernelModules = [ "amdgpu" ];
+
+  # Força a porta DisplayPort (DP-3) ativa mesmo se o computador for ligado
+  # com o monitor desligado, garantindo sinal de vídeo quando a tela for ligada.
+  boot.kernelParams = [ "video=DP-3:1920x1080@165e" ];
+
+  # Hibernação (suspend-to-disk): partição swap para salvar e restaurar a memória
+  boot.resumeDevice = "/dev/disk/by-uuid/bcd27a36-1bb4-4844-b1c3-0007ef6a97f6";
+
+  # Driver de vídeo AMD nativo no X11 e autoconfiguração de telas ao plugar/ligar
+  services.xserver.videoDrivers = [ "amdgpu" ];
+  services.autorandr.enable = true;
+
   networking.hostName = "cmb-nix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
