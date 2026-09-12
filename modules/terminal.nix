@@ -4,16 +4,10 @@
   # ===========================================================================
   # Terminal: apenas o WezTerm, rodando Nushell.
   #
-  # Remove os terminais que chegam "de fábrica" pelo X server (xterm) e pelo
-  # LXQt (qterminal) e publica a configuração do WezTerm gerenciada pelo flake.
+  # (qterminal é removido em ./lxqt.nix via environment.lxqt.excludePackages;
+  # xterm nem existe mais: era pacote do módulo do X server, removido na
+  # migração Wayland.)
   # ===========================================================================
-
-  # xterm: vem na lista padrão de pacotes do módulo do X server; o
-  # excludePackages apenas o remove do profile do sistema.
-  services.xserver.excludePackages = [ pkgs.xterm ];
-
-  # qterminal: vem nos optionalPackages do LXQt (removível por design).
-  environment.lxqt.excludePackages = [ pkgs.lxqt.qterminal ];
 
   # Configuração do WezTerm: o wezterm procura wezterm.lua primeiro em
   # ~/.config/wezterm/ e depois em $XDG_CONFIG_DIRS/wezterm (= /etc/xdg).

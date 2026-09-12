@@ -62,9 +62,6 @@
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="18f8", ATTR{idProduct}=="0f97", ATTR{power/wakeup}="disabled"
     ACTION=="add", SUBSYSTEM=="input", ATTR{name}=="*Optical Mouse*", ATTR{power/wakeup}="disabled"
-
-    # Ativa DisplayPort-2 automaticamente ao ligar o monitor após o boot
-    ACTION=="change", SUBSYSTEM=="drm", TAG+="systemd", ENV{SYSTEMD_WANTS}+="displayport-hotplug.service"
   '';
 
   # 2) Desativa o nó ACPI GPP0 (PCIe / barramento do SSD NVMe).

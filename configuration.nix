@@ -31,46 +31,14 @@
   # Early KMS para GPU AMD Radeon RX 6600 (amdgpu)
   boot.initrd.kernelModules = [ "amdgpu" ];
 
-  # Garante DisplayPort-2 sempre configurado como monitor primário ao iniciar o X11/LightDM
-  services.xserver.displayManager.setupCommands = ''
-    ${pkgs.xrandr}/bin/xrandr --output DisplayPort-2 --primary --auto || true
-  '';
+  # (X11 removido: sem setupCommands/xrandr — o labwc habilita toda saída
+  # conectada no modo preferido automaticamente; ver modules/wayland.nix)
 
   # Hibernação (suspend-to-disk): partição swap para salvar e restaurar a memória
   boot.resumeDevice = "/dev/disk/by-uuid/bcd27a36-1bb4-4844-b1c3-0007ef6a97f6";
 
-  # Driver de vídeo AMD nativo no X11 e autoconfiguração de telas ao plugar/ligar
-  services.xserver.videoDrivers = [ "amdgpu" ];
-  # Autorandr com perfil padrão para DisplayPort-2 e suporte à tela de login do LightDM (UID 78)
-  services.autorandr = {
-    enable = true;
-    defaultTarget = "default";
-    profiles.default = {
-      fingerprint.DisplayPort-2 = "*";
-      config.DisplayPort-2 = {
-        enable = true;
-        primary = true;
-        mode = "1920x1080";
-      };
-    };
-  };
-  systemd.services.autorandr.environment.AUTORANDR_UID_MIN = "0";
-
-  # Serviço acionado pelo udev ao ligar o monitor (evento DRM) para ativar a saída instantaneamente
-  systemd.services.displayport-hotplug = {
-    description = "Ativa DisplayPort-2 ao ligar o monitor após o boot";
-    wantedBy = [ ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = pkgs.writeShellScript "dp-hotplug" ''
-        for auth in /run/lightdm/root/:0 /home/*/.Xauthority; do
-          if [ -r "$auth" ]; then
-            DISPLAY=:0 XAUTHORITY="$auth" ${pkgs.xrandr}/bin/xrandr --output DisplayPort-2 --auto --primary || true
-          fi
-        done
-      '';
-    };
-  };
+  # (X11 removido: videoDrivers/autorandr/serviço de hotplug xrandr não têm
+  # papel sob Wayland; udev anti-wakeup do mouse continua em hosts/cmb-nix.nix)
 
   networking.hostName = "cmb-nix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -163,23 +131,10 @@ environment.systemPackages = with pkgs; [
 
 programs.nix-ld.enable = true;
 
-  # Oh-My-Pi (omp): coding agent instalado automaticamente
+  # Oh-My-Pi (omp): coding agent instalado automaticamente.
+  # A versão vem do input `oh-my-pi` do flake — `nix flake update` atualiza junto.
   programs.omp = {
     enable = true;
-    package = pkgs.runCommand "omp-18.1.15" {
-      meta = {
-        description = "Oh-My-Pi (omp) coding agent";
-        homepage = "https://github.com/can1357/oh-my-pi";
-        mainProgram = "omp";
-      };
-    } ''
-      mkdir -p $out/bin
-      cp ${pkgs.fetchurl {
-        url = "https://github.com/can1357/oh-my-pi/releases/download/v18.1.15/omp-linux-x64";
-        sha256 = "1p4s2h9ni0ynb31hdq3sjzjxkl11m6kpfihv953sqcmv3yj1hxbl";
-      }} $out/bin/omp
-      chmod +x $out/bin/omp
-    '';
   };
 
   # Some programs need SUID wrappers, can be configured further or are
