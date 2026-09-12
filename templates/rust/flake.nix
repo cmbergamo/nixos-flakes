@@ -30,7 +30,9 @@
           env.RUSTFLAGS = "-C link-arg=-fuse-ld=mold";
         };
 
-        packages.default = pkgs.buildRustPackage {
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          # buildRustPackage NÃO deriva nome/versão do Cargo.toml em eval-time;
+          # mantenha estes valores espelhando [[package]] em Cargo.toml.
           pname = "meu-projeto";
           version = "0.1.0";
           src = ./.;
