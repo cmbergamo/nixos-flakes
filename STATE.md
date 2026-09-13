@@ -13,7 +13,7 @@
 - inputs: nixos-unstable pin `eaad0894` (26.11.20260911) + rust-overlay (follows) + oh-my-pi (follows nixpkgs)
 - host único: `nixosConfigurations.cmb-nix` → `./configuration.nix`
 - `allowUnfree=true`; `nix-ld` ON (rustup/FHS bins); stateVersion "26.05"
-- `programs.omp.enable=true`: Oh-My-Pi via input `oh-my-pi` do flake (compila do fonte localmente a cada bump — ~10min; sem cache binário; antes havia fetchurl v18.1.15 hardcoded que congelava a versão) + nix-ld; PATH inclui ~/.local/bin
+- `programs.omp.enable=true`: Oh-My-Pi via input `oh-my-pi` do flake (compila do fonte localmente a cada bump — ~10min; sem cache binário; antes havia fetchurl v18.1.15 hardcoded que congelava a versão) + nix-ld; lock em `a3ee91a` = omp 18.1.19; `~/.local/bin` AGORA POR ÚLTIMO no PATH (Nix vence colisões — ver rust.nix)
 - devShell `nix develop` (rust-bin stable + r-a/clippy/rustfmt + mold); template `nix flake init -t .#rust`
 - `/etc/nixos` é CÓPIA VELHA separada (sem ./modules) — fonte da verdade é ESTE repo; rebuild sempre `--flake .#cmb-nix`
 
@@ -21,7 +21,7 @@
 | arquivo | faz | pegadinhas/decisões |
 |---|---|---|
 | hosts/cmb-nix.nix | /mnt/windows: nvme0n1p3 931G (UUID 34C813AFC8136E7C, ntfs3 force); /mnt/dados: sda2 223G (UUID B8567E5F567E1DF6, ntfs-3g); udev anti-wakeup p/ mouse óptico USB; serviço systemd disable-acpi-wakeup (desativa GPP0/NVMe falso despertar no AMD AM4) | nomes estavam invertidos; sda2 (dados) falhava com -22 no ntfs3 por bug no $BadClus, corrigido usando ntfs-3g; nvme0n1p3 (windows) monta perfeito no ntfs3; bookmarks GTK Dados e Windows; falso wakeup por GPP0 e ruído do sensor óptico corrigidos; hotplug xrandr/autorandr REMOVIDO no cutover Wayland (visava DisplayPort-2, conector nem usado — o ativo é DP-3; labwc auto-habilita no modo preferido) |
-| rust.nix | rustup + pkg-config/openssl/gdb/valgrind; PATH ~/.cargo/bin via shellInit+extraInit | pós-instalação manual: `rustup default stable && rustup component add rust-analyzer clippy rustfmt`; nushell precisa `path add ~/.cargo/bin` |
+| rust.nix | rustup + pkg-config/openssl/gdb/valgrind; shellInit+extraInit: `~/.cargo/bin` primeiro, `${PATH}`, `~/.local/bin` por último | pós-instalação manual: `rustup default stable && rustup component add rust-analyzer clippy rustfmt`; nushell precisa `path add ~/.cargo/bin`; a ordem nova mata a classe de shadow: um omp 18.1.14 gravado pelo self-update em ~/.local/bin sombreava o omp do flake e `nix flake update` parecia não funcionar |
 | gaming.nix | hardware.graphics (enable32Bit); udev steam-hardware; firewall Steam (27015/27036/27037/27040 TCP, 27015/27036/10400-10401/27031-27035 UDP); gamescope + mangohud; gamemode | Steam, Heroic, Lutris, ProtonUp-Qt e Prism Launcher migrados para Flatpaks declarativos |
 | lxqt.nix | módulo `services.xserver.desktopManager.lxqt` (ativação de pacotes/portais, com X desligado — sem asserções contra isso); excludePackages: qterminal+xscreensaver+obconf-qt; xkb br console; portal; fontes Fira Mono+Fira Code+Inter+JetBrains Mono+Noto Color Emoji; extras qt6ct+kvantum+breeze+papirus+bibata+gnome-themes-extra; tema escuro Kvantum KvArcDark, painel 36px/ícone 24px; GTK 2/3/4 prefer-dark; dconf global; swaylock /etc/swaylock/config; helix catppuccin; QT_STYLE_OVERRIDE=kvantum; serviço lxqt-config-setup sincroniza ~/.config | picom/xscreensaver/openbox rc.xml removidos com o X11; openbox continua instalado (pré-requisito do módulo) mas com xsessions strippado via overlay |
 | terminal.nix | remove qterminal (via lxqt.nix); publica /etc/xdg/wezterm/wezterm.lua com tema Catppuccin Mocha, Fira Mono 11.5, opacidade 0.95, padding 12px e nushell -l | wezterm lê XDG_CONFIG_DIRS; ~/.config/wezterm/wezterm.lua venceria; default_prog = nu -l (nushell login) |
@@ -53,7 +53,7 @@ nix eval --extra-experimental-features 'nix-command flakes' --impure \
 nix eval --raw ... --expr '...config.system.build.toplevel.outPath'   # ~10s, prova que instancia
 ```
 - qdbus real: /nix/store/zl9j32ik1fbnww5skqxjvybcvbk0i3q9-qttools-6.11.2/bin/qdbus (não estava no PATH antes do terminal.nix; agora qt6.qttools instalado)
-- último toplevel OK: j7xqi7dxcbzphjas51xmfbyvk7z746iw (pós-cutover Wayland; warning de peer wireguard ausente é esperado)
+- último toplevel OK: 24j6d75d78d7d5w236xs0ij15sd4f107 (gen 19, 13/set, lock a3ee91a/omp 18.1.19; warning de peer wireguard ausente é esperado)
 
 ## Não-fazendas (armadilhas já caindo fora)
 - NÃO referenciar /nix/store/hash em arquivos de config (quebra no `nix flake update`) — usar /run/current-system/sw/...
@@ -64,6 +64,8 @@ nix eval --raw ... --expr '...config.system.build.toplevel.outPath'   # ~10s, pr
 - overlay com chave pontilhada (`lxqt.x = ...`) SUBSTITUI o namespace `pkgs.lxqt` inteiro (merge `//` raso) — para scopes (makeScope) usar SEMPRE `prev.lxqt.overrideScope (lFinal: lPrev: { ... })`
 - `systemd.services.greetd...Environment` NÃO chega ao greeter: o worker do greetd execveia com o env montado pelo PAM (greetd/src/session/worker.rs) → injetar env de greeter/sessão via `environment.sessionVariables` (cai em /etc/pam/environment)
 - NÃO remover glycin-loaders/bubblewrap do environment.systemPackages: o ReGreet (glycin) precisa de <sw/share>/glycin-loaders/2+/conf.d + bwrap no PATH do greeter (via pam_env); sem eles o background cai no fallback GStreamer e a tela de login trava (thread gstglcontext a 100% CPU)
+- NÃO depender de binário em ~/.local/bin para pacote gerenciado pelo Nix: shellInit agora antepõe o PATH do sistema e põe ~/.local/bin por último; `omp update -f` recusa em instalação Nix (visto ao vivo: "This installation is managed by Nix...") e não recria o shadow
+- `nixos-rebuild switch` AO VIVO falha em silêncio (exit 1, nada no journal — stderr vai pro terminal via systemd-run --pty) desde o bump 26.11; ≥5 falhas em 13/set incluindo a ativação da própria gen 18. Workaround: `nixos-rebuild boot` + reboot (stage-1 ativa; GRUB default já aponta a gen nova). Suspeito: escrita MBR do grub-install em /dev/sda|sdb; investigar com `sudo env STC_DEBUG=1 <gen>/bin/switch-to-configuration switch`
 
 ## Regras do projeto
 1. **Evitar compilação local de pacotes**: ao adicionar algo ao sistema, preferir pacotes já presentes no /nix/store ou com substitute no cache.nixos.org. Verificar antes: `nix path-info --store https://cache.nixos.org <outPath>` (sucesso = download, sem build) e `ls /nix/store/<hash>-<nome>*` (presente = zero tráfego). Compilar do source (cargo/gcc) só quando não há binário — ex.: `programs.omp`. Checar com `nixos-rebuild dry-build` antes do switch.
