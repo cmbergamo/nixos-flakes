@@ -22,9 +22,12 @@
     valgrind
   ];
 
-  # ~/.cargo/bin e ~/.local/bin com prioridade no PATH (shells de login/interativos).
+  # ~/.cargo/bin com prioridade (rustup é gerenciado pelo usuário); ~/.local/bin
+  # DEPOIS dos caminhos do sistema: pacotes do Nix (ex.: omp) sempre vencem
+  # binários avulsos — um omp auto-atualizado em ~/.local/bin sombreava o do
+  # flake e `nix flake update` parecia não surtir efeito.
   environment.shellInit = ''
-    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:''${PATH}"
+    export PATH="$HOME/.cargo/bin:''${PATH}:$HOME/.local/bin"
   '';
   environment.extraInit = config.environment.shellInit;
 }
