@@ -9,8 +9,8 @@
   #   rustup default stable
   #   rustup component add rust-analyzer clippy rustfmt
   #
-  # Em nushell, se ~/.cargo/bin não aparecer no PATH, adicione em
-  # ~/.config/nushell/config.nu:  path add ~/.cargo/bin
+  # Em nushell, ~/.cargo/bin já chega herdando o PATH da sessão (set-environment);
+  # não é preciso `path add` — conferir com `nu -l -c '$env.PATH'` se sumir.
   environment.systemPackages = with pkgs; [
     rustup
 
