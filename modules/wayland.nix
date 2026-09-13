@@ -138,6 +138,15 @@
     slurp
     wl-clipboard
     pamixer
+    # ReGreet 0.5.0 carrega o wallpaper estático via glycin, que precisa:
+    #  - dos loaders em <XDG_DATA_DIRS>/glycin-loaders/2+/conf.d (descobertos
+    #    via /run/current-system/sw/share, que o pam_env já injeta no greeter);
+    #  - do bwrap no PATH (sandbox padrão fora de Flatpak; pam_env já inclui
+    #    /run/current-system/sw/bin). Sem eles o glycin falha e o ReGreet faz
+    #    fallback para GStreamer (gtk::MediaFile) num PNG estático — o pipeline
+    #    GL entra em spin e a tela de login congela sem aceitar input.
+    glycin-loaders
+    bubblewrap
   ];
 
   # Configuração do labwc gerenciada pelo flake, publicada em /etc/labwc:
