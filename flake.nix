@@ -36,6 +36,14 @@
       ];
     };
 
+    # --- Servidor Headless (Alta Performance e Baixo Uso de Memória) ---
+    nixosConfigurations.dstk-server = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs; };
+      modules = [
+        ./modules/hosts/server.nix
+      ];
+    };
+
     # --- Shell de desenvolvimento Rust ---
     # `nix develop` dentro de qualquer projeto: ambiente isolado e pinável,
     # independente do rustup do sistema. Útil para garantir toolchain fixa
