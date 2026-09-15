@@ -29,7 +29,7 @@
   users.users.cmbergamo = {
     isNormalUser = true;
     description = "cmbergamo";
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "networkmanager" ];
     initialPassword = "changeme";
     shell = pkgs.nushell;
   };

@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports =
@@ -47,9 +47,9 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable networking
+  # Enable networking (NetworkManager com DHCP automático como padrão)
   networking.networkmanager.enable = true;
-
+  networking.useDHCP = lib.mkDefault true;
   # Enable network manager applet
   programs.nm-applet.enable = true;
 

@@ -45,12 +45,13 @@
 
   # --- Rede e Firewall ---
   networking.useNetworkd = true;
+  networking.useDHCP = false; # DHCP delegado nativamente ao systemd-networkd
   networking.networkmanager.enable = false;
   systemd.network.enable = true;
 
-  # Habilita DHCP automático em todas as interfaces de rede cabeadas (en*, eth*)
+  # Habilita DHCP automático em todas as interfaces de rede cabeadas e wireless (en*, eth*, wl*, wlan*)
   systemd.network.networks."10-lan" = {
-    matchConfig.Name = "en* eth*";
+    matchConfig.Name = "en* eth* wl* wlan*";
     networkConfig = {
       DHCP = "yes";
       IPv6AcceptRA = true;
