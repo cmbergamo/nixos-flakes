@@ -144,6 +144,7 @@
   # Atalhos globais do LXQt gerenciados pelo flake
   environment.etc."lxqt/globalkeyshortcuts.conf".source = ./files/globalkeyshortcuts.conf;
 
+
   systemd.user.services.lxqt-config-setup = {
     description = "Sincroniza configurações visuais e atalhos do LXQt";
     wantedBy = [ "default.target" ];
@@ -200,6 +201,22 @@ gtk-cursor-theme-name="Bibata-Modern-Classic"
 gtk-cursor-theme-size=24
 EOF
         fi
+
+        # Diretórios padrão do usuário (XDG User Dirs: desativa updater e assegura caminhos corretos)
+        mkdir -p "$HOME/Desktop" "$HOME/Downloads" "$HOME/Templates" "$HOME/Public" "$HOME/documentos" "$HOME/Music" "$HOME/Pictures" "$HOME/Videos"
+        cat > "$HOME/.config/user-dirs.conf" << 'EOF'
+enabled=False
+EOF
+        cat > "$HOME/.config/user-dirs.dirs" << 'EOF'
+XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_TEMPLATES_DIR="$HOME/Templates"
+XDG_PUBLICSHARE_DIR="$HOME/Public"
+XDG_DOCUMENTS_DIR="$HOME/documentos"
+XDG_MUSIC_DIR="$HOME/Music"
+XDG_PICTURES_DIR="$HOME/Pictures"
+XDG_VIDEOS_DIR="$HOME/Videos"
+EOF
       '';
     };
   };

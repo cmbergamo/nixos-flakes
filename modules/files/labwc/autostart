@@ -5,8 +5,10 @@
 # Set background color or image (below the desktop):
 swaybg -i /run/current-system/sw/share/lxqt/wallpapers/origami-dark-labwc.png >/dev/null 2>&1 &
 
-# Faster startup for GTK apps:
-dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY > /dev/null 2>&1 &
+# Systemd user session environment and graphical session target:
+dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP > /dev/null 2>&1
+systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP > /dev/null 2>&1
+systemctl --user start nixos-fake-graphical-session.target > /dev/null 2>&1
 
 # Configure output directives such as mode, position, scale and transform.
 # Use wlr-randr to get your output names
