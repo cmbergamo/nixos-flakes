@@ -14,9 +14,12 @@
   time.timeZone = "America/Sao_Paulo";
   i18n.defaultLocale = "pt_BR.UTF-8";
 
-  # Shell padrão para o sistema inteiro
-  environment.shells = [ pkgs.nushell ];
+  # Shell padrão para o sistema inteiro (com registro em /etc/shells)
+  environment.shells = [ pkgs.nushell pkgs.bashInteractive ];
   users.defaultUserShell = pkgs.nushell;
+
+  # Shell do root preservado em bash para manutenção e compatibilidade com scripts POSIX/resgate
+  users.users.root.shell = pkgs.bash;
 
   # Usuários do sistema (senha inicial 'changeme' para bootstrap; altere no primeiro acesso com 'passwd')
   users.users.cmbergamo = {
