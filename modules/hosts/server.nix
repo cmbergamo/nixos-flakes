@@ -42,6 +42,16 @@
     shell = pkgs.nushell;
   };
 
+  # Integração com o Home Manager
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.users.cmbergamo = { ... }: {
+    home.stateVersion = "26.05";
+  };
+  home-manager.users.rmbergamo = { ... }: {
+    home.stateVersion = "26.05";
+  };
+
   # Suporte à execução de binários dinâmicos FHS baixados via scripts (ex: curl -fsSL https://omp.sh/install | sh)
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
