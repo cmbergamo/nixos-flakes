@@ -4,6 +4,7 @@
   imports = [
     ./server-hardware.nix
     ../server/base.nix
+    ../server/wireguard.nix
   ];
 
   # Nome do host no barramento de rede
