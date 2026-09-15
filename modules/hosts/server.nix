@@ -14,13 +14,17 @@
   time.timeZone = "America/Sao_Paulo";
   i18n.defaultLocale = "pt_BR.UTF-8";
 
+  # Shell padrão para o sistema inteiro
+  environment.shells = [ pkgs.nushell ];
+  users.defaultUserShell = pkgs.nushell;
+
   # Usuários do sistema (senha inicial 'changeme' para bootstrap; altere no primeiro acesso com 'passwd')
   users.users.cmbergamo = {
     isNormalUser = true;
     description = "cmbergamo";
     extraGroups = [ "wheel" ];
     initialPassword = "changeme";
-    shell = pkgs.bash;
+    shell = pkgs.nushell;
   };
 
   users.users.rmbergamo = {
@@ -28,8 +32,24 @@
     description = "rmbergamo";
     extraGroups = [ ];
     initialPassword = "changeme";
-    shell = pkgs.bash;
+    shell = pkgs.nushell;
   };
+
+  # Suporte à execução de binários dinâmicos FHS baixados via scripts (ex: curl -fsSL https://omp.sh/install | sh)
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc.lib
+    zlib
+    openssl
+    curl
+    glibc
+  ];
+
+  # Garante ~/.local/bin no PATH (onde scripts de instalação costumam salvar binários)
+  environment.shellInit = ''
+    export PATH="$HOME/.local/bin:''${PATH}"
+  '';
+  environment.extraInit = config.environment.shellInit;
 
   # Pacotes adicionais do sistema
   environment.systemPackages = with pkgs; [
