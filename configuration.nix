@@ -47,10 +47,9 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable networking (NetworkManager com DHCP automático como padrão)
+  # Enable networking (NetworkManager gerencia conexões e DHCP nativamente)
   networking.networkmanager.enable = true;
-  networking.useDHCP = lib.mkDefault true;
-  # Enable network manager applet
+  networking.useDHCP = lib.mkDefault false;
   programs.nm-applet.enable = true;
 
   # Set your time zone.
