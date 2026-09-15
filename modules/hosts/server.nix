@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./server-hardware.nix
+    /etc/nixos/hardware-configuration.nix
     ../server/base.nix
     ../server/wireguard.nix
   ];
@@ -14,7 +14,7 @@
   time.timeZone = "America/Sao_Paulo";
   i18n.defaultLocale = "pt_BR.UTF-8";
 
-  # Usuário principal do sistema (senha inicial 'changeme' para bootstrap; altere no primeiro acesso com 'passwd')
+  # Usuários do sistema (senha inicial 'changeme' para bootstrap; altere no primeiro acesso com 'passwd')
   users.users.cmbergamo = {
     isNormalUser = true;
     description = "cmbergamo";
@@ -22,6 +22,19 @@
     initialPassword = "changeme";
     shell = pkgs.bash;
   };
+
+  users.users.rmbergamo = {
+    isNormalUser = true;
+    description = "rmbergamo";
+    extraGroups = [ ];
+    initialPassword = "changeme";
+    shell = pkgs.bash;
+  };
+
+  # Pacotes adicionais do sistema
+  environment.systemPackages = with pkgs; [
+    git
+  ];
 
   # Exige senha para comandos sudo
   security.sudo.wheelNeedsPassword = true;

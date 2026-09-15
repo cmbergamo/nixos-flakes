@@ -11,26 +11,28 @@
 
 ## Flake
 - inputs: nixos-unstable pin `eaad0894` (26.11.20260911) + rust-overlay (follows) + oh-my-pi (follows nixpkgs)
-- host único: `nixosConfigurations.cmb-nix` → `./configuration.nix`
+- hosts: `nixosConfigurations.cmb-nix` → `./configuration.nix`; `nixosConfigurations.dstk-server` → `./modules/hosts/server.nix`
 - `allowUnfree=true`; `nix-ld` ON (rustup/FHS bins); stateVersion "26.05"
 - `programs.omp.enable=true`: Oh-My-Pi via input `oh-my-pi` do flake (compila do fonte localmente a cada bump — ~10min; sem cache binário; antes havia fetchurl v18.1.15 hardcoded que congelava a versão) + nix-ld; lock em `a3ee91a` = omp 18.1.19; `~/.local/bin` AGORA POR ÚLTIMO no PATH (Nix vence colisões — ver rust.nix)
 - devShell `nix develop` (rust-bin stable + r-a/clippy/rustfmt + mold); template `nix flake init -t .#rust`
 - `/etc/nixos` é CÓPIA VELHA separada (sem ./modules) — fonte da verdade é ESTE repo; rebuild sempre `--flake .#cmb-nix`
 
-## Módulos (todos importados em configuration.nix)
+## Módulos (todos importados em configuration.nix ou hosts/server.nix)
 | arquivo | faz | pegadinhas/decisões |
 |---|---|---|
 | hosts/cmb-nix.nix | /mnt/windows: nvme0n1p3 931G (UUID 34C813AFC8136E7C, ntfs3 force); /mnt/dados: sda2 223G (UUID B8567E5F567E1DF6, ntfs-3g); udev anti-wakeup p/ mouse óptico USB; serviço systemd disable-acpi-wakeup (desativa GPP0/NVMe falso despertar no AMD AM4) | nomes estavam invertidos; sda2 (dados) falhava com -22 no ntfs3 por bug no $BadClus, corrigido usando ntfs-3g; nvme0n1p3 (windows) monta perfeito no ntfs3; bookmarks GTK Dados e Windows; falso wakeup por GPP0 e ruído do sensor óptico corrigidos; hotplug xrandr/autorandr REMOVIDO no cutover Wayland (visava DisplayPort-2, conector nem usado — o ativo é DP-3; labwc auto-habilita no modo preferido) |
+| hosts/server.nix | Configuração do servidor dstk-server; importa `/etc/nixos/hardware-configuration.nix` dinamicamente com `--impure`, define usuários `cmbergamo` (admin/wheel) e `rmbergamo` (usuário comum sem wheel), inclui `pkgs.git` | `server-hardware.nix` removido; exige rebuild com `--impure` no host alvo; trava de segurança impede rebuild em modo puro no desktop |
 | rust.nix | rustup + pkg-config/openssl/gdb/valgrind; shellInit+extraInit: `~/.cargo/bin` primeiro, `${PATH}`, `~/.local/bin` por último | pós-instalação manual: `rustup default stable && rustup component add rust-analyzer clippy rustfmt`; nushell herda os dois dirs do set-environment da sessão (verificado `nu -l -c $env.PATH`) — sem `path add`; a ordem nova mata a classe de shadow: um omp 18.1.14 gravado pelo self-update em ~/.local/bin sombreava o omp do flake e `nix flake update` parecia não funcionar |
 | gaming.nix | hardware.graphics (enable32Bit); udev steam-hardware; firewall Steam (27015/27036/27037/27040 TCP, 27015/27036/10400-10401/27031-27035 UDP); gamescope + mangohud; gamemode | Steam, Heroic, Lutris, ProtonUp-Qt e Prism Launcher migrados para Flatpaks declarativos |
 | lxqt.nix | módulo `services.xserver.desktopManager.lxqt` (ativação de pacotes/portais, com X desligado — sem asserções contra isso); excludePackages: qterminal+xscreensaver+obconf-qt; xkb br console; portal; fontes Fira Mono+Fira Code+Inter+JetBrains Mono+Noto Color Emoji; extras qt6ct+kvantum+breeze+papirus+bibata+gnome-themes-extra; tema escuro Kvantum KvArcDark, painel 36px/ícone 24px; GTK 2/3/4 prefer-dark; dconf global; swaylock /etc/swaylock/config; helix catppuccin; QT_STYLE_OVERRIDE=kvantum; serviço lxqt-config-setup sincroniza ~/.config | picom/xscreensaver/openbox rc.xml removidos com o X11; openbox continua instalado (pré-requisito do módulo) mas com xsessions strippado via overlay |
 | terminal.nix | remove qterminal (via lxqt.nix); publica /etc/xdg/wezterm/wezterm.lua com tema Catppuccin Mocha, Fira Mono 11.5, opacidade 0.95, padding 12px e nushell -l | wezterm lê XDG_CONFIG_DIRS; ~/.config/wezterm/wezterm.lua venceria; default_prog = nu -l (nushell login) |
-| wayland.nix | STACK GRÁFICO ÚNICO (X11/LightDM removidos): services.xserver.enable=mkForce false; programs.labwc (sessão crua strippada no pacote); greetd+ReGreet (greeter GTK4 sobre cage; origami-dark, prefer-dark, Papirus-Dark, Bibata, Fira Mono 11); sessionPackages=mkForce [lxqt-wayland-session] (farm=1 sessão); overlay strip xsessions do openbox+lxqt-session (overrideScope — `//` raso NÃO funciona em scope); XKB_DEFAULT_LAYOUT=br via sessionVariables (greeter NÃO herda env da unidade systemd — worker execveia com env do PAM/pam_env); portal lxqt=[lxqt,wlr,gtk]; /etc/labwc (rc/env/autostart/menu/themerc); session.conf compositor=labwc+swaylock; labwc-config-link | ReGreet varre XDG_DATA_DIRS inteiro → strips nos pacotes são obrigatórios (senão labwc/openbox/lxqt X vazam p/ tela de login); sem kanshi: labwc habilita toda saída no modo preferido (autoEnableOutputs); DP-3 é o conector em uso (o antigo xrandr mirava DisplayPort-2, já morto); ReGreet 0.5.0 exige glycin-loaders+bubblewrap no profile (sem eles: fallback GStreamer p/ PNG estático → gstglcontext em spin → tela de login congelada) |
+| wayland.nix | STACK GRÁFICO ÚNICO (X11/LightDM removidos): services.xserver.enable=mkForce false; programs.labwc (sessão crua strippada no pacote); greetd+ReGreet (greeter GTK4 sobre cage; origami-dark, prefer-dark, Papirus-Dark, Bibata, Fira Mono 11); sessionPackages=mkForce [lxqt-wayland-session] (farm=1 sessão); overlay strip xsessions do openbox+lxqt-session (overrideScope — `//` raso NÃO funciona em scope); XKB_DEFAULT_LAYOUT=br via sessionVariables (greeter NÃO herda env da unidade systemd — worker execveia com env do PAM/pam_env); portal lxqt=[lxqt,wlr,gtk]; /etc/labwc (rc/env/autostart/menu/themerc); session.conf compositor=labwc+swaylock; labwc-config-link | ReGreet varre XDG_DATA_DIRS inteiro → strips nos pacotes são obrigatórios (senão labwc/openbox aparecem no dropdown) |
 | memory.nix | zram zstd 50%; earlyoom 5%/5%; swappiness 20 | |
 | printing.nix | avahi (nssmdns4+fw); drivers=[epson-escpr]; fila Epson-L4260 socket://192.168.1.24:9100; scanner SANE com sane-airscan em /etc/sane.d/airscan.conf (eSCL/Mopria https 192.168.1.24 porta 443 sem timeout mDNS) + epsonscan2 (com overlay withNonFreePlugins=true para plugin de rede ESC/I-2 + serviço epsonscan2-net-config garante IP 192.168.1.24 e modo Network) + firewall portas 1865 TCP/UDP; app simple-scan | L4260 responde eSCL nativo sobre HTTPS (testado e confirmado); grupos scanner e lp no usuário; epsonscan2 exige plugin proprietário bundle para rede (porta 1865) |
 | wireguard.nix | cliente wg0; chave privada auto-gerada /var/lib/wireguard/wg0.key (generatePrivateKeyFile); peer condicional; NM unmanaged `interface-name:wg*`; DNS túnel 1.1.1.1/9.9.9.9 via resolvconf postSetup (linhas printf, sem heredoc — módulo injeta indentado) | **PENDENTE: preencher serverPublicKey+serverEndpoint (e tunnelIP) no topo do arquivo quando usuário passar dados do servidor**; sem peer = warning esperado no rebuild; após preencher: cadastrar `sudo wg show wg0 public-key` no servidor |
 | server/wireguard.nix | nó wg0 dstk-server na rede CMB-Net (IP 172.17.0.7/16, porta 51820, peer 35.211.106.233:51820, allowedIPs 172.17.0.0/16, keepalive 25s); chave privada lida de /etc/wireguard/wg0.key (fora do git); fw UDP 51820 e trustedInterfaces wg0 | configurado a partir de CMB-Net.conf |
 | flatpak.nix | gerenciamento declarativo via nix-flatpak; auto-update semanal; pacotes declarativos: Firefox, RustDesk, LocalSend, Bazaar, Steam, Heroic, Lutris, ProtonUp-Qt, PrismLauncher; wrappers CLI para terminal/atalhos; firewall LocalSend portas 53317 TCP/UDP | migração do Firefox e jogos nativos para Flatpak; liberação da porta 53317 corrige descoberta do LocalSend pelo celular |
+
 ## files/ (conteúdo publicado)
 - globalkeyshortcuts.conf: Win+B firefox, Win+T wezterm, Win+E pcmanfm, Win+R runner, Super_L fancymenu, Print screengrab, volume/brightness/VT switches (Win+Esc removido: era xscreensaver; no Wayland rc.xml já binda W-Esc/W-l → swaylock)
 - lxqt/lxqt.conf: theme=dark, icon_theme=Papirus-Dark, cursor_theme=Bibata-Modern-Classic (24), font=Fira Mono 10, style=kvantum, palette=Dark, seção [Palette] dark completa
@@ -55,7 +57,19 @@ nix eval --raw ... --expr '...config.system.build.toplevel.outPath'   # ~10s, pr
 - qdbus real: /nix/store/zl9j32ik1fbnww5skqxjvybcvbk0i3q9-qttools-6.11.2/bin/qdbus (não estava no PATH antes do terminal.nix; agora qt6.qttools instalado)
 - último toplevel OK: 24j6d75d78d7d5w236xs0ij15sd4f107 (gen 19, 13/set, lock a3ee91a/omp 18.1.19; warning de peer wireguard ausente é esperado)
 
+## Procedimento de Recuperação de Boot (cmb-nix)
+1. Reiniciar a máquina (se no Windows, segurar `Shift` ao clicar em Reiniciar -> Solução de Problemas -> Opções Avançadas -> Configurações de Firmware UEFI ou pressionar `Del`/`F8`/`F11`/`F12` no POST).
+2. No menu do GRUB, **não** selecionar a primeira opção (`dstk-server`). Pressionar `Esc` ou `Shift` se necessário para exibir o menu.
+3. Navegar até "NixOS - All configurations" / "Previous generations".
+4. Selecionar a última geração funcional de `cmb-nix` e pressionar Enter.
+5. Após inicializar no NixOS `cmb-nix`, restaurar o bootloader padrão abrindo o terminal e executando:
+   ```bash
+   cd ~/nixos-flakes
+   sudo nixos-rebuild boot --flake .#cmb-nix
+   ```
+
 ## Não-fazendas (armadilhas já caindo fora)
+- **NUNCA executar `nixos-rebuild boot --flake .#dstk-server` na máquina desktop (`cmb-nix`)**: o bootloader do sistema será sobrescrito com a configuração do servidor, impedindo a inicialização normal. O `dstk-server` importa `/etc/nixos/hardware-configuration.nix` de forma dinâmica com `--impure` diretamente na máquina servidora.
 - NÃO referenciar /nix/store/hash em arquivos de config (quebra no `nix flake update`) — usar /run/current-system/sw/...
 - NÃO `programs.steam` antigo `services.xserver.desktopManager.steam` (renomeado); NÃO `hardware.opengl` (removido 25.11+)
 - NÃO editar ~/.config/lxqt/globalkeyshortcuts.conf nem ~/.config/labwc como fonte (serviços/symlinks do flake vencem no login)
