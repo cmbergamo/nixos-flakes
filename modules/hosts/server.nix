@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -6,6 +6,10 @@
     ../server/base.nix
     ../server/wireguard.nix
   ];
+
+  # Bootloader UEFI (systemd-boot)
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   # Nome do host no barramento de rede
   networking.hostName = "dstk-server";
