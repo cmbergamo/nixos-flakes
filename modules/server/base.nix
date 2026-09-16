@@ -49,19 +49,34 @@
   networking.networkmanager.enable = false;
   systemd.network.enable = true;
 
-  # Força as interfaces ethernet eno* (eno1, eno2) administrativamente UP com DHCP
+  # Força as interfaces ethernet eno* (eno1, eno2) com cliente DHCP robusto
   systemd.network.networks."05-eno" = {
     matchConfig.Name = "eno*";
+    matchConfig.Type = "ether";
     linkConfig = {
       RequiredForOnline = false;
     };
     networkConfig = {
       DHCP = "yes";
       IPv6AcceptRA = true;
+      KeepConfiguration = "no";
+      ConfigureWithoutCarrier = true;
+    };
+    dhcpV4Config = {
+      RouteMetric = 100;
+      ClientIdentifier = "mac";
+      SendHostname = true;
+      UseDNS = true;
+      UseRoutes = true;
+      UseGateway = true;
+    };
+    dhcpV6Config = {
+      RouteMetric = 100;
+      UseDNS = true;
     };
   };
 
-  # Habilita DHCP automático em todas as interfaces de rede cabeadas e wireless (en*, eth*, wl*, wlan*)
+  # Habilita DHCP automático em todas as interfaces cabeadas e wireless (en*, eth*, wl*, wlan*)
   systemd.network.networks."10-lan" = {
     matchConfig.Name = "en* eth* wl* wlan*";
     linkConfig = {
@@ -70,9 +85,22 @@
     networkConfig = {
       DHCP = "yes";
       IPv6AcceptRA = true;
+      KeepConfiguration = "no";
+      ConfigureWithoutCarrier = true;
+    };
+    dhcpV4Config = {
+      RouteMetric = 200;
+      ClientIdentifier = "mac";
+      SendHostname = true;
+      UseDNS = true;
+      UseRoutes = true;
+      UseGateway = true;
+    };
+    dhcpV6Config = {
+      RouteMetric = 200;
+      UseDNS = true;
     };
   };
-  # Serviço de inicialização prévia: garante ativação administrativa imediata das placas de rede no boot
   systemd.services.bring-network-interfaces-up = {
     description = "Garante que interfaces de rede ethernet eno1/eno2 e correlatas estejam administrativamente UP no boot";
     wantedBy = [ "network-pre.target" ];
