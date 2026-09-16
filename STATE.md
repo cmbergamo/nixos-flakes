@@ -101,8 +101,10 @@ nix eval --raw ... --expr '...config.system.build.toplevel.outPath'   # ~10s, pr
    - Receita base: `wsl.exe -e sh -lc 'podman run --rm -v "$PWD:/work:ro" -w /work docker.io/nixos/nix nix flake check --impure --all-systems'`
    - Hierarquia de verificação preferida: (a) container no WSL → (b) `nix eval` no dstk-server (tem nix + store aquecido, só não pode `switch`) → (c) rebuild real. Nunca pular direto para (c) em opção que mexe em rede/boot de host remoto.
 ## Procedimento de Recuperação de Rede (dstk-server, sem console)
-1. Local: provisionar a chave real (passo que quebra o ciclo sem tocar na LAN):
-   `grep '^PrivateKey' CMB-Net.conf | cut -d= -f2 | tr -d ' ' | ssh dstk-server 'sudo tee /etc/wireguard/wg0.key >/dev/null && sudo chown root:systemd-network /etc/wireguard/wg0.key && sudo chmod 0640 /etc/wireguard/wg0.key'`
+1. Local: provisionar a chave real (passo que quebra o ciclo sem tocar na LAN).
+   bash: `grep '^PrivateKey' CMB-Net.conf | cut -d= -f2- | tr -d " \r" | ssh dstk-server 'sudo tee /etc/wireguard/wg0.key >/dev/null && sudo chown root:systemd-network /etc/wireguard/wg0.key && sudo chmod 0640 /etc/wireguard/wg0.key'` — **`-f2-` obrigatório**: chave WG é base64 e o padding final `=` é truncado por `-f2` (visto ao vivo).
+   nushell (Windows, sem grep): `open --raw CMB-Net.conf | lines | where $it =~ '^PrivateKey' | first | str replace --regex '^.*?=' '' | str trim | ssh dstk-server 'sudo tee /etc/wireguard/wg0.key >/dev/null && sudo chown root:systemd-network /etc/wireguard/wg0.key && sudo chmod 0640 /etc/wireguard/wg0.key'`
+   Validar: `sudo wc -c /etc/wireguard/wg0.key` (45 = 44+newline) e `sudo wg pubkey < /etc/wireguard/wg0.key` (falha se base64 inválido).
 2. SSH: `sudo systemctl reset-failed systemd-networkd && sudo systemctl restart systemd-networkd`; se ainda sem rota: `sudo ip route add default via 192.168.0.1 dev eno1` (gateway responde ping; resolved tem FallbackDNS 1.1.1.1 → DNS volta junto da rota).
 3. `sudo systemd-run --collect --pty --unit=rebuild-switch nixos-rebuild switch --impure --flake .#dstk-server` (desacoplado do SSH — a ativação pode trocar o IP da eno1).
 4. Perdeu o SSH: procurar lease `dstk-server` no roteador (SendHostname=true) ou `nmap -sn 192.168.0.0/24`.
