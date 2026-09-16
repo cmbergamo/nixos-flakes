@@ -1,3 +1,5 @@
 # Credenciais e configurações locais com chaves privadas
 /CMB-Net.conf
 *.key
+/key-setup.nu
+/wg0.key.tmp
