@@ -66,6 +66,8 @@
       configFile.source = ../files/nushell/config.nu;
     };
   };
+
+  # Suporte à execução de binários dinâmicos FHS baixados via scripts (ex: curl -fsSL https://omp.sh/install | sh)
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     stdenv.cc.cc.lib
