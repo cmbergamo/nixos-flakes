@@ -155,6 +155,8 @@ $env.PROMPT_INDICATOR = ""
 $env.PROMPT_INDICATOR_VI_INSERT = ""
 $env.PROMPT_INDICATOR_VI_NORMAL = ""
 $env.PROMPT_MULTILINE_INDICATOR = "::: "
+# Desativa mensagem de boas-vindas / banner
+$env.config.show_banner = false
 
 # Desativa marcadores semânticos OSC 133 (evita quebras de linha espúrias em conexões remotas WezTerm/SSH)
 $env.config.shell_integration.osc133 = false
