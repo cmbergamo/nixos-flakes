@@ -18,6 +18,7 @@
       ./modules/printing.nix
       ./modules/wireguard.nix
       ./modules/flatpak.nix
+      ./modules/nushell.nix
     ];
 
   # Use the GRUB 2 boot loader.

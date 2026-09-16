@@ -153,7 +153,11 @@
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "lxqt-config-setup" ''
         mkdir -p "$HOME/.config/lxqt" "$HOME/.config/pcmanfm-qt/lxqt"
-
+        # Nushell config declarativo
+        mkdir -p "$HOME/.config/nushell"
+        if [ ! -e "$HOME/.config/nushell/config.nu" ] || [ -L "$HOME/.config/nushell/config.nu" ]; then
+          ln -sfn /etc/nushell/config.nu "$HOME/.config/nushell/config.nu"
+        fi
         # Atalhos gerenciados pelo flake
         ln -sfn /etc/lxqt/globalkeyshortcuts.conf "$HOME/.config/lxqt/globalkeyshortcuts.conf"
 

@@ -5,8 +5,8 @@
     /etc/nixos/hardware-configuration.nix
     ../server/base.nix
     ../server/wireguard.nix
+    ../nushell.nix
   ];
-
   # Bootloader UEFI (systemd-boot)
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -47,12 +47,18 @@
   home-manager.useUserPackages = true;
   home-manager.users.cmbergamo = { ... }: {
     home.stateVersion = "26.05";
+    programs.nushell = {
+      enable = true;
+      configFile.source = ../files/nushell/config.nu;
+    };
   };
   home-manager.users.rmbergamo = { ... }: {
     home.stateVersion = "26.05";
+    programs.nushell = {
+      enable = true;
+      configFile.source = ../files/nushell/config.nu;
+    };
   };
-
-  # Suporte à execução de binários dinâmicos FHS baixados via scripts (ex: curl -fsSL https://omp.sh/install | sh)
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     stdenv.cc.cc.lib
