@@ -49,21 +49,30 @@
   networking.networkmanager.enable = false;
   systemd.network.enable = true;
 
-  # Força as interfaces ethernet eno* (eno1, eno2) com cliente DHCP robusto
-  systemd.network.networks."05-eno" = {
-    matchConfig.Name = "eno*";
-    matchConfig.Type = "ether";
+  # --- Interfaces ethernet cabeadas: DHCP via systemd-networkd ---
+  # Schema verificado no nixpkgs travado (rev ef34387, nixos/lib/systemd-lib.nix):
+  #   - networks.<name>.linkConfig -> seção [Link] de um .network: ACEITA ActivationPolicy e RequiredForOnline.
+  #   - links.<name>.linkConfig    -> arquivo .link: NÃO aceita ActivationPolicy (foi isso que gerou o
+  #                                    "Systemd Link has extra fields" e o TypeError original, não as networks).
+  # Arquivo único cobrindo toda placa cabeada (en*/eth*): evita sobreposição de matches que faria o
+  # networkd fundir dois .network no mesmo link e travar a negociação DHCP.
+  systemd.network.networks."10-lan" = {
+    matchConfig.Name = "en* eth*";
     linkConfig = {
+      # always-up: o próprio networkd força o link administrativamente UP antes de negociar DHCP.
+      ActivationPolicy = "always-up";
       RequiredForOnline = false;
     };
     networkConfig = {
       DHCP = "yes";
       IPv6AcceptRA = true;
       KeepConfiguration = "no";
-      ConfigureWithoutCarrier = true;
+      ConfigureWithoutCarrier = true; # não espera o carrier: evita perder o DHCP em portas de autonegociação lenta
     };
     dhcpV4Config = {
       RouteMetric = 100;
+      # ClientIdentifier=mac: a maioria dos roteadores/switches com DHCP snooping ignora o DUID/IAID
+      # enviado por padrão pelo networkd -> o OFFER nunca chega (link UP, mas sem IP).
       ClientIdentifier = "mac";
       SendHostname = true;
       UseDNS = true;
@@ -76,33 +85,11 @@
     };
   };
 
-  # Habilita DHCP automático em todas as interfaces cabeadas e wireless (en*, eth*, wl*, wlan*)
-  systemd.network.networks."10-lan" = {
-    matchConfig.Name = "en* eth* wl* wlan*";
-    linkConfig = {
-      RequiredForOnline = false;
-    };
-    networkConfig = {
-      DHCP = "yes";
-      IPv6AcceptRA = true;
-      KeepConfiguration = "no";
-      ConfigureWithoutCarrier = true;
-    };
-    dhcpV4Config = {
-      RouteMetric = 200;
-      ClientIdentifier = "mac";
-      SendHostname = true;
-      UseDNS = true;
-      UseRoutes = true;
-      UseGateway = true;
-    };
-    dhcpV6Config = {
-      RouteMetric = 200;
-      UseDNS = true;
-    };
-  };
+  # Serviço de inicialização prévia: sobe administrativamente as placas de rede no boot.
+  # Roda em network-pre.target (antes do systemd-networkd), então quando o networkd assume
+  # as interfaces o link já está UP e a negociação DHCP começa imediatamente.
   systemd.services.bring-network-interfaces-up = {
-    description = "Garante que interfaces de rede ethernet eno1/eno2 e correlatas estejam administrativamente UP no boot";
+    description = "Garante que interfaces ethernet cabeadas (eno1/eno2 e correlatas) estejam administrativamente UP no boot";
     wantedBy = [ "network-pre.target" ];
     before = [ "network-pre.target" "systemd-networkd.service" ];
     serviceConfig = {
