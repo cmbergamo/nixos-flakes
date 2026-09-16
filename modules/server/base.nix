@@ -53,7 +53,6 @@
   systemd.network.networks."05-eno" = {
     matchConfig.Name = "eno*";
     linkConfig = {
-      ActivationPolicy = "always-up";
       RequiredForOnline = false;
     };
     networkConfig = {
@@ -66,7 +65,6 @@
   systemd.network.networks."10-lan" = {
     matchConfig.Name = "en* eth* wl* wlan*";
     linkConfig = {
-      ActivationPolicy = "always-up";
       RequiredForOnline = false;
     };
     networkConfig = {

@@ -1,0 +1,10 @@
+# Garante que todos os arquivos do repositório usem quebras de linha padrão Unix (LF),
+# evitando erros de sintaxe com \r em builders do Nix/NixOS sob ambientes Windows.
+* text=auto eol=lf
+*.nix text eol=lf
+*.lua text eol=lf
+*.nu text eol=lf
+*.toml text eol=lf
+*.conf text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
