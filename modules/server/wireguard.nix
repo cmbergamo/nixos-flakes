@@ -20,10 +20,23 @@
   networking.firewall.allowedUDPPorts = [ 51820 ];
   networking.firewall.trustedInterfaces = [ "wg0" ];
 
-  # Garante diretório seguro com grupo systemd-network para leitura pelo daemon
+  # Garante o diretório onde a chave privada vive (fora do git e do store)
   systemd.tmpfiles.rules = [
     "d /etc/wireguard 0750 root systemd-network -"
   ];
+
+  # SALVAGUARDA DE DEPENDÊNCIA: a LAN é pré-requisito do túnel, nunca o contrário.
+  # useNetworkd tem default = config.networking.useNetworkd, que este host liga para
+  # o DHCP das placas físicas. Com o backend networkd ativo, o módulo wireguard injeta
+  # LoadCredential=wireguard-wg0-private-key:/etc/wireguard/wg0.key DENTRO da unit do
+  # systemd-networkd (nixos/modules/services/networking/wireguard-networkd.nix:243).
+  # Consequência: se /etc/wireguard/wg0.key não existir, o systemd-networkd morre em
+  # status=243/CREDENTIALS antes de negociar qualquer DHCP -> a LAN inteira cai junto
+  # com o túnel (foi o que travou o dstk-server sem IP/rota padrão).
+  # Com o backend script, wg0 passa a ser criado por wireguard-wg0.service, que roda
+  # depois de network-online.target: a LAN sobe sozinha e o túnel entra depois.
+  # A ausência da chave passa a derrubar apenas o wireguard-wg0.service.
+  networking.wireguard.useNetworkd = false;
 
   networking.wireguard.interfaces.wg0 = {
     ips = [ "172.17.0.7/16" ];
