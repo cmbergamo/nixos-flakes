@@ -100,5 +100,12 @@ nix eval --raw ... --expr '...config.system.build.toplevel.outPath'   # ~10s, pr
    - **Limite conhecido**: `hosts/server.nix` importa `/etc/nixos/hardware-configuration.nix` de forma absoluta com `--impure`, então a avaliação do host `dstk-server` FECHA se o arquivo não existir no container. Solução: montar um stub (`-v ./hardware-configuration.nix:/etc/nixos/hardware-configuration.nix:ro`) ou avaliar o módulo isoladamente via `eval-config.nix` com `imports = [ ./modules/server/base.nix ]`.
    - Receita base: `wsl.exe -e sh -lc 'podman run --rm -v "$PWD:/work:ro" -w /work docker.io/nixos/nix nix flake check --impure --all-systems'`
    - Hierarquia de verificação preferida: (a) container no WSL → (b) `nix eval` no dstk-server (tem nix + store aquecido, só não pode `switch`) → (c) rebuild real. Nunca pular direto para (c) em opção que mexe em rede/boot de host remoto.
+## Procedimento de Recuperação de Rede (dstk-server, sem console)
+1. Local: provisionar a chave real (passo que quebra o ciclo sem tocar na LAN):
+   `grep '^PrivateKey' CMB-Net.conf | cut -d= -f2 | tr -d ' ' | ssh dstk-server 'sudo tee /etc/wireguard/wg0.key >/dev/null && sudo chown root:systemd-network /etc/wireguard/wg0.key && sudo chmod 0640 /etc/wireguard/wg0.key'`
+2. SSH: `sudo systemctl reset-failed systemd-networkd && sudo systemctl restart systemd-networkd`; se ainda sem rota: `sudo ip route add default via 192.168.0.1 dev eno1` (gateway responde ping; resolved tem FallbackDNS 1.1.1.1 → DNS volta junto da rota).
+3. `sudo systemd-run --collect --pty --unit=rebuild-switch nixos-rebuild switch --impure --flake .#dstk-server` (desacoplado do SSH — a ativação pode trocar o IP da eno1).
+4. Perdeu o SSH: procurar lease `dstk-server` no roteador (SendHostname=true) ou `nmap -sn 192.168.0.0/24`.
+Sintoma-guia: `Resolving timed out` no nix + `ip route show default` vazio + networkd `failed (243/CREDENTIALS)` = geração ativa antiga com credencial ausente; NÃO é o config novo com defeito (conferir `grep LoadCredential /nix/store/*-system-units/systemd-networkd.service.d/overrides.conf`).
 ## Histórico
 e00c0c9 (2026-09-08): wayland/terminal/printing/wireguard/hosts+STATE.md. Antes: `git log --oneline`.
