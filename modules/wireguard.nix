@@ -47,8 +47,8 @@ in
     # Peer único (servidor). Só existe quando serverPublicKey for preenchida.
     peers = lib.optionals (serverPublicKey != null) [
       {
-        inherit serverPublicKey;
-        inherit serverEndpoint;
+        publicKey = serverPublicKey;
+        endpoint = serverEndpoint;
         allowedIPs = serverAllowedIPs;
         # Mantém o NAT da sua rede vivo enquanto a conexão estiver ociosa.
         persistentKeepalive = 25;

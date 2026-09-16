@@ -1,10 +1,15 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
-    ./server-hardware.nix
+    /etc/nixos/hardware-configuration.nix
     ../server/base.nix
+    ../server/wireguard.nix
   ];
+
+  # Bootloader UEFI (systemd-boot)
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   # Nome do host no barramento de rede
   networking.hostName = "dstk-server";
@@ -13,14 +18,60 @@
   time.timeZone = "America/Sao_Paulo";
   i18n.defaultLocale = "pt_BR.UTF-8";
 
-  # Usuário principal do sistema (senha inicial 'changeme' para bootstrap; altere no primeiro acesso com 'passwd')
+  # Shell padrão para o sistema inteiro (com registro em /etc/shells)
+  environment.shells = [ pkgs.nushell pkgs.bashInteractive ];
+  users.defaultUserShell = pkgs.nushell;
+
+  # Shell do root preservado em bash para manutenção e compatibilidade com scripts POSIX/resgate
+  users.users.root.shell = pkgs.bash;
+
+  # Usuários do sistema (senha inicial 'changeme' para bootstrap; altere no primeiro acesso com 'passwd')
   users.users.cmbergamo = {
     isNormalUser = true;
     description = "cmbergamo";
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "networkmanager" ];
     initialPassword = "changeme";
-    shell = pkgs.bash;
+    shell = pkgs.nushell;
   };
+
+  users.users.rmbergamo = {
+    isNormalUser = true;
+    description = "rmbergamo";
+    extraGroups = [ ];
+    initialPassword = "changeme";
+    shell = pkgs.nushell;
+  };
+
+  # Integração com o Home Manager
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.users.cmbergamo = { ... }: {
+    home.stateVersion = "26.05";
+  };
+  home-manager.users.rmbergamo = { ... }: {
+    home.stateVersion = "26.05";
+  };
+
+  # Suporte à execução de binários dinâmicos FHS baixados via scripts (ex: curl -fsSL https://omp.sh/install | sh)
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc.lib
+    zlib
+    openssl
+    curl
+    glibc
+  ];
+
+  # Garante ~/.local/bin no PATH (onde scripts de instalação costumam salvar binários)
+  environment.shellInit = ''
+    export PATH="$HOME/.local/bin:''${PATH}"
+  '';
+  environment.extraInit = config.environment.shellInit;
+
+  # Pacotes adicionais do sistema
+  environment.systemPackages = with pkgs; [
+    git
+  ];
 
   # Exige senha para comandos sudo
   security.sudo.wheelNeedsPassword = true;

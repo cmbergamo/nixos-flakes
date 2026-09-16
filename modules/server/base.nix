@@ -45,7 +45,28 @@
 
   # --- Rede e Firewall ---
   networking.useNetworkd = true;
+  networking.useDHCP = false; # DHCP delegado nativamente ao systemd-networkd
   networking.networkmanager.enable = false;
+  systemd.network.enable = true;
+
+  # Habilita DHCP automático em todas as interfaces de rede cabeadas e wireless (en*, eth*, wl*, wlan*)
+  systemd.network.networks."10-lan" = {
+    matchConfig.Name = "en* eth* wl* wlan*";
+    networkConfig = {
+      DHCP = "yes";
+      IPv6AcceptRA = true;
+    };
+  };
+
+  # Evita que o boot trave esperando por portas ethernet desconectadas em placas multi-porta
+  systemd.network.wait-online.anyInterface = true;
+
+  # Resolução de nomes DNS via systemd-resolved integrada ao networkd
+  services.resolved = {
+    enable = true;
+    fallbackDns = [ "1.1.1.1" "8.8.8.8" ];
+  };
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];
