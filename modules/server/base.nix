@@ -80,7 +80,8 @@
       UseGateway = true;
     };
     dhcpV6Config = {
-      RouteMetric = 100;
+      # DHCPv6 nao tem RouteMetric (opcao exclusiva do [DHCPv4]); o metric do
+      # roteamento IPv6 vem de IPv6RouteMetric na secao [IPv6RouteTable]/RA.
       UseDNS = true;
     };
   };

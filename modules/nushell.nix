@@ -32,12 +32,14 @@ in
 
     # Popula novos usuários em /etc/skel
     environment.etc."skel/.config/nushell/config.nu".source = ./files/nushell/config.nu;
-  }
 
-  # optionalAttrs (e nao mkIf) para NAO instanciar o submodulo da unit quando
-  # desligado: mkIf false ainda criaria uma entrada vazia em systemd.user.services.
-  // lib.optionalAttrs cfg.manageUserConfig {
-    systemd.user.services.nushell-config-setup = {
+    # Vincula ~/.config/nushell/config.nu nas sessões de usuário.
+    # mkIf (e NAO `// optionalAttrs`): com optionalAttrs o conjunto de chaves do
+    # atributo `config` passa a depender do valor de `config.modules.nushell.*`, e o
+    # module system precisa dessas chaves para checar definicoes nao casadas ->
+    # recursao infinita. mkIf filtra a definicao antes disso e, em types.attrsOf,
+    # a chave simplesmente nao aparece quando a condicao e falsa (nao gera unit vazia).
+    systemd.user.services.nushell-config-setup = lib.mkIf cfg.manageUserConfig {
       description = "Sincroniza configuração declarativa do Nushell";
       wantedBy = [ "default.target" ];
       serviceConfig = {
