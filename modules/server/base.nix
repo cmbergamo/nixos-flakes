@@ -74,15 +74,6 @@
       IPv6AcceptRA = true;
     };
   };
-
-  # Garante a nível de link do udev que as interfaces estejam em estado always-up
-  systemd.network.links."10-lan" = {
-    matchConfig.OriginalName = "en* eth* wl* wlan*";
-    linkConfig = {
-      ActivationPolicy = "always-up";
-    };
-  };
-
   # Serviço de inicialização prévia: garante ativação administrativa imediata das placas de rede no boot
   systemd.services.bring-network-interfaces-up = {
     description = "Garante que interfaces de rede ethernet eno1/eno2 e correlatas estejam administrativamente UP no boot";
@@ -104,12 +95,12 @@
 
   # Evita que o boot trave esperando por portas ethernet desconectadas em placas multi-porta
   systemd.network.wait-online.anyInterface = true;
+
   # Resolução de nomes DNS via systemd-resolved integrada ao networkd
   services.resolved = {
     enable = true;
-    fallbackDns = [ "1.1.1.1" "8.8.8.8" ];
+    settings.Resolve.FallbackDNS = [ "1.1.1.1" "8.8.8.8" ];
   };
-
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];
