@@ -158,5 +158,8 @@ $env.PROMPT_MULTILINE_INDICATOR = "::: "
 # Desativa mensagem de boas-vindas / banner
 $env.config.show_banner = false
 
+# Editor padrão: Helix (usado por Ctrl+X no REPL e pelo comando `edit`)
+$env.config.buffer_editor = "hx"
+
 # Desativa marcadores semânticos OSC 133 (evita quebras de linha espúrias em conexões remotas WezTerm/SSH)
 $env.config.shell_integration.osc133 = false

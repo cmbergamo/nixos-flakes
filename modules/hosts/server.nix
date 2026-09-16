@@ -45,6 +45,13 @@
   # Integração com o Home Manager
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
+  # O Nushell gera um ~/.config/nushell/config.nu de scaffold na primeira execução.
+  # Sem isto o HM recusa sobrescrever arquivo que não criou e a ativação inteira do
+  # usuário falha ("would be clobbered"), deixando o config declarativo fora do ar.
+  home-manager.backupFileExtension = "backup";
+  # No servidor, o Home Manager e o unico dono de ~/.config/nushell/config.nu.
+  # Desliga o servico systemd de usuario para nao haver dois gerenciadores no mesmo caminho.
+  modules.nushell.manageUserConfig = false;
   home-manager.users.cmbergamo = { ... }: {
     home.stateVersion = "26.05";
     programs.nushell = {

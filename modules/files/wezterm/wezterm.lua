@@ -14,7 +14,20 @@ else
 end
 
 -- Tipografia
-config.font = wezterm.font("Fira Mono")
+-- FiraCode traz as ligaduras de codigo (=> -> != |= ...) e os glifos de icones do
+-- prompt (powerline/nerd). A variante "Mono" vem primeiro porque e a unica de largura
+-- fixa: sem ela os icones proporcional quebram o alinhamento das colunas do terminal.
+-- Fira Code e Fira Mono ficam como fallback para os glifos ausentes na Nerd Font.
+config.font = wezterm.font_with_fallback({
+  "FiraCode Nerd Font Mono",
+  "Fira Code",
+  "Fira Mono",
+})
+
+-- NAO definir config.harfbuzz_features aqui: atribuir essa chave substitui a lista
+-- padrao do WezTerm (que ja traz calt/clig/liga/kern/mark/mkmk), perdendo kerning e
+-- marcacao de acentos. As ligaduras ja vem ligadas por default via HarfBuzz.
+
 config.font_size = 11.5
 config.line_height = 1.0
 

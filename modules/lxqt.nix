@@ -58,6 +58,9 @@
     packages = with pkgs; [
       fira-mono
       fira-code
+      # Variante Nerd Font: mesma familia FiraCode, porem com os glifos de icones
+      # (powerline/nerd) alem das ligaduras. E a fonte que o WezTerm seleciona.
+      nerd-fonts.fira-code
       inter
       jetbrains-mono
       noto-fonts-color-emoji
