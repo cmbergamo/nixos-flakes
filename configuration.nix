@@ -103,6 +103,7 @@
     description = "cmbergamo";
     extraGroups = [ "networkmanager" "wheel" "gamemode" "scanner" "lp" ];
     packages = with pkgs; [
+      nodejs
     #  thunderbird
     ];
   };
