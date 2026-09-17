@@ -32,6 +32,7 @@
     extraGroups = [ "wheel" "networkmanager" ];
     initialPassword = "changeme";
     shell = pkgs.nushell;
+    linger = true;
   };
 
   users.users.rmbergamo = {
@@ -40,6 +41,7 @@
     extraGroups = [ ];
     initialPassword = "changeme";
     shell = pkgs.nushell;
+    linger = true;
   };
 
   # Permitir que os usuários gerenciem livremente seus arquivos de configuração (sem conflito com systemd service global)
