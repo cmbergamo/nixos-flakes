@@ -14,10 +14,6 @@
 
     # Gerenciador declarativo de Flatpaks
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-
-    # Gerenciador declarativo de ambiente do usuário (utilizado no dstk-server)
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, ... }:
@@ -44,7 +40,6 @@
     nixosConfigurations.dstk-server = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
       modules = [
-        inputs.home-manager.nixosModules.home-manager
         ./modules/hosts/server.nix
       ];
     };

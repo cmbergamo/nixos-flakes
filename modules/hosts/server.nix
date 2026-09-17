@@ -42,30 +42,8 @@
     shell = pkgs.nushell;
   };
 
-  # Integração com o Home Manager
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  # O Nushell gera um ~/.config/nushell/config.nu de scaffold na primeira execução.
-  # Sem isto o HM recusa sobrescrever arquivo que não criou e a ativação inteira do
-  # usuário falha ("would be clobbered"), deixando o config declarativo fora do ar.
-  home-manager.backupFileExtension = "backup";
-  # No servidor, o Home Manager e o unico dono de ~/.config/nushell/config.nu.
-  # Desliga o servico systemd de usuario para nao haver dois gerenciadores no mesmo caminho.
+  # Permitir que os usuários gerenciem livremente seus arquivos de configuração (sem conflito com systemd service global)
   modules.nushell.manageUserConfig = false;
-  home-manager.users.cmbergamo = { ... }: {
-    home.stateVersion = "26.05";
-    programs.nushell = {
-      enable = true;
-      configFile.source = ../files/nushell/config.nu;
-    };
-  };
-  home-manager.users.rmbergamo = { ... }: {
-    home.stateVersion = "26.05";
-    programs.nushell = {
-      enable = true;
-      configFile.source = ../files/nushell/config.nu;
-    };
-  };
 
   # Suporte à execução de binários dinâmicos FHS baixados via scripts (ex: curl -fsSL https://omp.sh/install | sh)
   programs.nix-ld.enable = true;
@@ -83,9 +61,10 @@
   '';
   environment.extraInit = config.environment.shellInit;
 
-  # Pacotes adicionais do sistema
+  # Pacotes adicionais do sistema (inclui home-manager CLI para permitir gestão autônoma por usuário)
   environment.systemPackages = with pkgs; [
     git
+    home-manager
   ];
 
   # Exige senha para comandos sudo
