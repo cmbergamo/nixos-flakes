@@ -13,6 +13,7 @@
   # não é preciso `path add` — conferir com `nu -l -c '$env.PATH'` se sumir.
   environment.systemPackages = with pkgs; [
     rustup
+    gcc
 
     # Dependências de crates nativos (openssl-sys, libsqlite3-sys, etc.)
     # e ferramentas de debug/perf para desenvolvimento.
