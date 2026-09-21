@@ -132,11 +132,9 @@ environment.systemPackages = with pkgs; [
 
 programs.nix-ld.enable = true;
 
-  # Oh-My-Pi (omp): coding agent instalado automaticamente.
-  # A versão vem do input `oh-my-pi` do flake — `nix flake update` atualiza junto.
-  programs.omp = {
-    enable = true;
-  };
+  # Oh-My-Pi (omp): NÃO é mais pacote do flake — instalado via script pelo
+  # usuário (curl -fsSL https://omp.sh/install | sh → ~/.local/bin, já no PATH
+  # via modules/rust.nix). O nix-ld habilitado acima fornece as libs FHS.
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
