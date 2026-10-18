@@ -97,11 +97,14 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
 
+  # Suporte a injeção de input do kernel (teclado/mouse) para Wayland e RustDesk
+  hardware.uinput.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."cmbergamo" = {
     isNormalUser = true;
     description = "cmbergamo";
-    extraGroups = [ "networkmanager" "wheel" "gamemode" "scanner" "lp" ];
+    extraGroups = [ "networkmanager" "wheel" "gamemode" "scanner" "lp" "uinput" ];
     packages = with pkgs; [
       nodejs
     #  thunderbird

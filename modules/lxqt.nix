@@ -127,6 +127,9 @@
     gtk-cursor-theme-name=Bibata-Modern-Classic
     gtk-cursor-theme-size=24
     gtk-application-prefer-dark-theme=1
+    # Botões de janela em apps CSD (Firefox flatpak, apps GTK sem decoração
+    # do compositor): sem esta linha o GTK usa o padrão GNOME (só "close").
+    gtk-decoration-layout=appmenu:minimize,maximize,close
   '';
   environment.etc."xdg/gtk-4.0/settings.ini".text = ''
     [Settings]
@@ -136,6 +139,7 @@
     gtk-cursor-theme-name=Bibata-Modern-Classic
     gtk-cursor-theme-size=24
     gtk-application-prefer-dark-theme=1
+    gtk-decoration-layout=appmenu:minimize,maximize,close
   '';
 
   # Configuração de tema escuro para o editor Helix
