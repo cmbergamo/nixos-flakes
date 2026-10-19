@@ -6,7 +6,10 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages = with pkgs; [ vulkan-tools ];
+    extraPackages = with pkgs; [
+      vulkan-tools
+      libva-utils
+    ];
   };
 
   # Regras udev para controles e gamepads (Xbox, PlayStation, Switch, Steam Controller)

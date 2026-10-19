@@ -1,0 +1,10 @@
+{
+  "policies": {
+    "DisableAppUpdate": true,
+    "HardwareAcceleration": true,
+    "EnableTrackingProtection": {
+      "Value": true,
+      "Locked": false
+    }
+  }
+}

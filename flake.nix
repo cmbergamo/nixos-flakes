@@ -8,10 +8,6 @@
     rust-overlay.url = "github:oxalica/rust-overlay";
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Oh-My-Pi (omp): coding agent
-    oh-my-pi.url = "github:can1357/oh-my-pi";
-    oh-my-pi.inputs.nixpkgs.follows = "nixpkgs";
-
     # Gerenciador declarativo de Flatpaks
     nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
@@ -30,7 +26,6 @@
     nixosConfigurations.cmb-nix = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
       modules = [
-        inputs.oh-my-pi.nixosModules.default
         inputs.nix-flatpak.nixosModules.nix-flatpak
         ./configuration.nix
       ];

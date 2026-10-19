@@ -97,12 +97,16 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
 
+  # Suporte a injeção de input do kernel (teclado/mouse) para Wayland e RustDesk
+  hardware.uinput.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."cmbergamo" = {
     isNormalUser = true;
     description = "cmbergamo";
-    extraGroups = [ "networkmanager" "wheel" "gamemode" "scanner" "lp" ];
+    extraGroups = [ "networkmanager" "wheel" "gamemode" "scanner" "lp" "uinput" ];
     packages = with pkgs; [
+      nodejs
     #  thunderbird
     ];
   };
@@ -131,11 +135,9 @@ environment.systemPackages = with pkgs; [
 
 programs.nix-ld.enable = true;
 
-  # Oh-My-Pi (omp): coding agent instalado automaticamente.
-  # A versão vem do input `oh-my-pi` do flake — `nix flake update` atualiza junto.
-  programs.omp = {
-    enable = true;
-  };
+  # Oh-My-Pi (omp): NÃO é mais pacote do flake — instalado via script pelo
+  # usuário (curl -fsSL https://omp.sh/install | sh → ~/.local/bin, já no PATH
+  # via modules/rust.nix). O nix-ld habilitado acima fornece as libs FHS.
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

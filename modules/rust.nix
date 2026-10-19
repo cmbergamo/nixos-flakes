@@ -13,6 +13,7 @@
   # não é preciso `path add` — conferir com `nu -l -c '$env.PATH'` se sumir.
   environment.systemPackages = with pkgs; [
     rustup
+    gcc
 
     # Dependências de crates nativos (openssl-sys, libsqlite3-sys, etc.)
     # e ferramentas de debug/perf para desenvolvimento.
@@ -23,9 +24,9 @@
   ];
 
   # ~/.cargo/bin com prioridade (rustup é gerenciado pelo usuário); ~/.local/bin
-  # DEPOIS dos caminhos do sistema: pacotes do Nix (ex.: omp) sempre vencem
-  # binários avulsos — um omp auto-atualizado em ~/.local/bin sombreava o do
-  # flake e `nix flake update` parecia não surtir efeito.
+  # DEPOIS dos caminhos do sistema: binários baixados por scripts de instalação
+  # (ex.: omp via `curl -fsSL https://omp.sh/install | sh`) ficam no PATH sem
+  # jamais sombrear pacotes gerenciados pelo Nix.
   environment.shellInit = ''
     export PATH="$HOME/.cargo/bin:''${PATH}:$HOME/.local/bin"
   '';

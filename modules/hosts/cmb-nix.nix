@@ -33,7 +33,7 @@
     options = [
       "uid=1000" "gid=100"
       "dmask=022"
-      "fmask=133"
+      "fmask=022"
       "windows_names"
       "nofail"
       "x-systemd.automount"
