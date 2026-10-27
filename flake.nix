@@ -36,6 +36,16 @@
       specialArgs = { inherit inputs; };
       modules = [
         ./modules/hosts/server.nix
+        ./erp-distak/deploy/fiscal-hml/nixos/erp-distak-fiscal-hml.nix
+        ({ pkgs, ... }: {
+          erpDistak.fiscalHml = {
+            enable = true;
+            operadorChavesSsh = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICngzln/77Z3+GEhwbX6cQGpyiIjkaX1pPmfztdUn3q7" ];
+            # NÃO definir openbaoPackage: o módulo usa pkgs.openbao se >= 2.6.4 e, senão,
+            # usa o OpenBao 2.7.1 do nixpkgs fixado por revisão + hash.
+            # worker.habilitar e api.habilitar ficam no PADRÃO (false).
+          };
+        })
       ];
     };
 

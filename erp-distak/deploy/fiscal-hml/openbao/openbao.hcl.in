@@ -1,0 +1,41 @@
+# [FISCAL-I3-HML-INFRA-DSTK-SERVER-01] Configuracao do servidor OpenBao do cofre do A1 (HML).
+# FONTE UNICA: este gabarito e renderizado tanto pelo modulo NixOS (deploy/fiscal-hml/nixos) quanto
+# pelo ensaio (deploy/fiscal-hml/ensaio) — o que foi ensaiado e o que sera implantado.
+# Os marcadores entre arrobas sao substituidos por ensaio/render-config.sh (ou pelo Nix); nenhum
+# deles carrega segredo. Modo dev PROIBIDO; sem root token persistente; sem tls_skip_verify.
+# Achado do ensaio (OpenBao 2.7.1): "disable_mlock" e campo NAO suportado (o OpenBao nao faz mais
+# mlock); a protecao contra swap e feita pelo servico (MemorySwapMax=0 no modulo NixOS).
+
+ui = false
+cluster_name = "erp-distak-fiscal-hml"
+log_level = "info"
+log_format = "json"
+
+# Enderecos apenas em loopback (D31: 127.0.0.1, nunca "localhost"). Nada e publicado na rede.
+api_addr = "https://@LISTEN_HOST@:@LISTEN_PORT@"
+cluster_addr = "https://@LISTEN_HOST@:@CLUSTER_PORT@"
+
+# Armazenamento integrado (Raft): persistente em disco, com snapshot nativo para backup.
+storage "raft" {
+	path = "@STATE_DIR@/raft"
+	node_id = "@NODE_ID@"
+}
+
+# Auditoria DECLARATIVA (o OpenBao 2.7 recusa habilitar dispositivo de auditoria pela API). Os
+# valores sensiveis (senha, PFX, tokens, secret_id) saem em HMAC — nunca em claro. Se o arquivo
+# nao puder ser gravado o OpenBao RECUSA atender (fail-closed): o diretorio e do servico.
+audit "file" "arquivo" {
+	description = "Auditoria do cofre fiscal HML (HMAC dos valores sensiveis)"
+	options {
+		file_path = "@AUDIT_FILE@"
+	}
+}
+
+listener "tcp" {
+	address = "@LISTEN_HOST@:@LISTEN_PORT@"
+	cluster_address = "@LISTEN_HOST@:@CLUSTER_PORT@"
+	tls_cert_file = "@TLS_DIR@/server.crt"
+	tls_key_file = "@TLS_DIR@/server.key"
+	tls_min_version = "tls12"
+	tls_disable_client_certs = true
+}
