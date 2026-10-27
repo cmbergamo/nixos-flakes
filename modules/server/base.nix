@@ -107,8 +107,13 @@
     };
   };
 
-  # Evita que o boot trave esperando por portas ethernet desconectadas em placas multi-porta
-  systemd.network.wait-online.anyInterface = true;
+  # Evita que o boot trave esperando por portas ethernet desconectadas (ex: eno2 sem cabo)
+  systemd.network.wait-online = {
+    enable = true;
+    anyInterface = false;
+    extraArgs = [ "--interface=eno1" "--operational-state=routable" ];
+    timeout = 10;
+  };
 
   # Resolução de nomes DNS via systemd-resolved integrada ao networkd
   services.resolved = {
