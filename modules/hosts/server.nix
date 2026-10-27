@@ -5,7 +5,6 @@
     /etc/nixos/hardware-configuration.nix
     ../server/base.nix
     ../server/wireguard.nix
-    ../server/openbao.nix
     ../nushell.nix
   ];
   # Bootloader UEFI (systemd-boot)
