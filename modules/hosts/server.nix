@@ -2,7 +2,7 @@
 
 {
   imports = [
-    /etc/nixos/hardware-configuration.nix
+    ../hardware-configuration.nix
     ../server/base.nix
     ../server/wireguard.nix
     ../nushell.nix
